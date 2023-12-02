@@ -27,28 +27,37 @@ if (File.Exists(path))
 	Regex redCubePattern = new Regex(@"(\d+) red", RegexOptions.Compiled | RegexOptions.IgnoreCase);
 	Regex greenCubePattern = new Regex(@"(\d+) green", RegexOptions.Compiled | RegexOptions.IgnoreCase);
 	Regex blueCubePattern = new Regex(@"(\d+) blue", RegexOptions.Compiled | RegexOptions.IgnoreCase);
+
+	Regex[] cubePatterns = { redCubePattern, greenCubePattern, blueCubePattern };
 	
 	while (file.ReadLine() is { } ln && counter < 10)
 	{
 		
 		gameId = Int32.Parse(gameIdPattern.Match(ln).Groups[1].Captures[0].Value);
 		Console.WriteLine($"processing {gameId}: " + ln);
-		Console.Write("RED: ");
-		foreach (Match match in redCubePattern.Matches(ln)) {
-			int matchedNumber = Int32.Parse(match.Groups[1].Captures[0].Value);
-			//Console.Write(matchedNumber + ", ");
-			isPossible = matchedNumber <= constraint[Color.Red];
-			if (!isPossible) break;
+		
+		//This loop logic is new and almost certainly wrong but I am going to bed
+		foreach (Regex cubePattern in cubePatterns)
+		{
+			foreach (Match match in cubePattern.Matches(ln))
+			{
+				int matchedNumber = Int32.Parse(match.Groups[1].Captures[0].Value);
+				isPossible = matchedNumber <= constraint[Color.Red];
+				if (!isPossible) break;
+			}
+
+			Console.WriteLine();
+			if (isPossible)
+			{
+				sumOfPossibleGameIds += gameId;
+			}
+			else
+			{
+				Console.WriteLine($"GAME WITH ID {gameId} IS NOT POSSIBLE");
+				isPossible = true;
+			}
 		}
 
-		Console.WriteLine();
-		if (isPossible) {
-			sumOfPossibleGameIds += gameId;
-		}
-		else {
-			Console.WriteLine($"GAME WITH ID {gameId} IS NOT POSSIBLE");
-			isPossible = true;
-		}
 		counter++;
 		
 	}
