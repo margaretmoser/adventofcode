@@ -19,23 +19,38 @@ if (File.Exists(path))
 	// Read file using StreamReader. Reads file line by line
 	using StreamReader file = new StreamReader(path);
 	int counter = 0;
-	int gameNumber = -1;
-	bool isPossible = false;
-	int sumOfPossibleGameIds;
+	int gameId = -1;
+	bool isPossible = true;
+	int sumOfPossibleGameIds = 0;
 	
+	Regex gameIdPattern = new Regex(@"^Game (\d+)", RegexOptions.Compiled | RegexOptions.IgnoreCase);
 	Regex redCubePattern = new Regex(@"(\d+) red", RegexOptions.Compiled | RegexOptions.IgnoreCase);
 	Regex greenCubePattern = new Regex(@"(\d+) green", RegexOptions.Compiled | RegexOptions.IgnoreCase);
 	Regex blueCubePattern = new Regex(@"(\d+) blue", RegexOptions.Compiled | RegexOptions.IgnoreCase);
 	
 	while (file.ReadLine() is { } ln && counter < 10)
 	{
-		Console.WriteLine("processing line " + counter + " with value " + ln);
+		
+		gameId = Int32.Parse(gameIdPattern.Match(ln).Groups[1].Captures[0].Value);
+		Console.WriteLine($"processing {gameId}: " + ln);
 		Console.Write("RED: ");
-		foreach (Match match in redCubePattern.Matches(ln))
-		{
-			Console.Write("found " + match.Groups[1].Captures[0] + " at index "+match.Index+", ");
+		foreach (Match match in redCubePattern.Matches(ln)) {
+			int matchedNumber = Int32.Parse(match.Groups[1].Captures[0].Value);
+			//Console.Write(matchedNumber + ", ");
+			isPossible = matchedNumber <= constraint[Color.Red];
+			if (!isPossible) break;
+		}
+
+		Console.WriteLine();
+		if (isPossible) {
+			sumOfPossibleGameIds += gameId;
+		}
+		else {
+			Console.WriteLine($"GAME WITH ID {gameId} IS NOT POSSIBLE");
+			isPossible = true;
 		}
 		counter++;
+		
 	}
 	file.Close();
 }
