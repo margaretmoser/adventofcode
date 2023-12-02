@@ -1,30 +1,26 @@
-﻿using System.Text.RegularExpressions;
+﻿using System.Runtime.CompilerServices;
+using System.Text.RegularExpressions;
 
-/*
- * https://adventofcode.com/2023/day/2
- *
- * "game" where you determine whether you could have drawn a particular number
- * of cubes of a color from a bag with a defined set of cubes in red, green and blue.
- *
- * Regex and some break logic
- */
-
-class Program1 {
-	Dictionary<string, Color> colorLookup = new Dictionary<string, Color>
+/*Part 2: 
+*/
+class Program2
+{
+	static Dictionary<string, Color> colorLookup = new Dictionary<string, Color>
 	{
 		{ "red", Color.Red },
 		{ "green", Color.Green },
 		{ "blue", Color.Blue }
 	};
 
-	Dictionary<Color, int> constraint = new Dictionary<Color, int>
+	static Dictionary<Color, int> constraint = new Dictionary<Color, int>
 	{
 		{ Color.Red, 12 },
 		{ Color.Green, 13 },
 		{ Color.Blue, 14 }
 	};
 
-	void Main()
+	static void Main()
+
 	{
 		var path = Path.Combine(Directory.GetCurrentDirectory(), "input.txt");
 		if (File.Exists(path))
@@ -85,4 +81,9 @@ class Program1 {
 			Console.WriteLine($"no file found at {path}");
 		}
 	}
+}
+
+enum Color
+{
+	Red, Green, Blue
 }
