@@ -1,64 +1,65 @@
-﻿using System;
-using System.IO;
-using System.Text.RegularExpressions;
-using System.Collections;
+﻿using System.Text.RegularExpressions;
 
-Dictionary<string, Color> colorLookup = new Dictionary<string, Color>();
-colorLookup.Add("red", Color.Red);
-colorLookup.Add("green", Color.Green);
-colorLookup.Add("blue", Color.Blue);
+Dictionary<string, Color> colorLookup = new Dictionary<string, Color>
+{
+	{ "red", Color.Red },
+	{ "green", Color.Green },
+	{ "blue", Color.Blue }
+};
 
-Dictionary<Color, int> constraint = new Dictionary<Color, int>();
-constraint.Add(Color.Red, 12);
-constraint.Add(Color.Green, 13);
-constraint.Add(Color.Blue, 14);
+Dictionary<Color, int> constraint = new Dictionary<Color, int>
+{
+	{ Color.Red, 12 },
+	{ Color.Green, 13 },
+	{ Color.Blue, 14 }
+};
 
 var path = Path.Combine(Directory.GetCurrentDirectory(), "input.txt"); 
 if (File.Exists(path))
 {
 	// Read file using StreamReader. Reads file line by line
 	using StreamReader file = new StreamReader(path);
-	int counter = 0;
-	int gameId = -1;
+	//int counter = 0;
 	bool isPossible = true;
 	int sumOfPossibleGameIds = 0;
 	
 	Regex gameIdPattern = new Regex(@"^Game (\d+)", RegexOptions.Compiled | RegexOptions.IgnoreCase);
-	Regex redCubePattern = new Regex(@"(\d+) red", RegexOptions.Compiled | RegexOptions.IgnoreCase);
-	Regex greenCubePattern = new Regex(@"(\d+) green", RegexOptions.Compiled | RegexOptions.IgnoreCase);
-	Regex blueCubePattern = new Regex(@"(\d+) blue", RegexOptions.Compiled | RegexOptions.IgnoreCase);
-
-	Regex[] cubePatterns = { redCubePattern, greenCubePattern, blueCubePattern };
-	
-	while (file.ReadLine() is { } ln && counter < 10)
+	while (file.ReadLine() is { } ln)
 	{
 		
-		gameId = Int32.Parse(gameIdPattern.Match(ln).Groups[1].Captures[0].Value);
+		var gameId = Int32.Parse(gameIdPattern.Match(ln).Groups[1].Captures[0].Value);
 		Console.WriteLine($"processing {gameId}: " + ln);
 		
-		//This loop logic is new and almost certainly wrong but I am going to bed
-		foreach (Regex cubePattern in cubePatterns)
+		//for each color (red, green, blue)
+		foreach (var colorString in colorLookup.Keys)
 		{
+			var cubePattern = new Regex(@"(\d+) "+colorString, RegexOptions.Compiled | RegexOptions.IgnoreCase);
+			//get the matches in this line
 			foreach (Match match in cubePattern.Matches(ln))
 			{
+				//Console.WriteLine("matched "+match.Value);
 				int matchedNumber = Int32.Parse(match.Groups[1].Captures[0].Value);
-				isPossible = matchedNumber <= constraint[Color.Red];
+				//if this match makes the game impossible then break
+				isPossible = matchedNumber <= constraint[colorLookup[colorString]];
+				
 				if (!isPossible) break;
 			}
+			//if this color makes the game impossible then break
+			if (!isPossible)
+			{
+				Console.WriteLine($"Color "+colorString+$" makes game id {gameId} impossible, sum is now {sumOfPossibleGameIds}");
+				break;	
+			}
 
-			Console.WriteLine();
-			if (isPossible)
-			{
-				sumOfPossibleGameIds += gameId;
-			}
-			else
-			{
-				Console.WriteLine($"GAME WITH ID {gameId} IS NOT POSSIBLE");
-				isPossible = true;
-			}
+		}
+		//after all the colors are processed for this line
+		if (isPossible)
+		{
+			sumOfPossibleGameIds += gameId;
+			Console.WriteLine($"Game id {gameId} is possible, sum is now {sumOfPossibleGameIds}");
 		}
 
-		counter++;
+		//counter++;
 		
 	}
 	file.Close();
