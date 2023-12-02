@@ -1,3 +1,10 @@
-﻿// See https://aka.ms/new-console-template for more information
+﻿using System.Collections;
 
-Console.WriteLine("Hello, World!");
+Dictionary<Color, int> constraint = new Dictionary<Color, int>();
+constraint.Add(Color.Red, 12);
+constraint.Add(Color.Green, 13);
+constraint.Add(Color.Blue, 14);
+enum Color
+{
+	Red, Green, Blue
+}
