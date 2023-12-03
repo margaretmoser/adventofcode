@@ -4,7 +4,7 @@ using System.Text.RegularExpressions;
 /*Part 2: find the minimum cubes needed for a particular game
  https://adventofcode.com/2023/day/2#part2
 */
-class Program2
+class Day2Problem2
 {
 	static Dictionary<string, Color> colorLookup = new Dictionary<string, Color>
 	{

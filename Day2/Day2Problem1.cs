@@ -9,7 +9,7 @@
  * Regex and some break logic
  */
 
-class Program1 {
+class Day2Problem1 {
 	Dictionary<string, Color> colorLookup = new Dictionary<string, Color>
 	{
 		{ "red", Color.Red },
