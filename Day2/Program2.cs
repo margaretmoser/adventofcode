@@ -1,7 +1,8 @@
 ﻿using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
 
-/*Part 2: 
+/*Part 2: find the minimum cubes needed for a particular game
+ https://adventofcode.com/2023/day/2#part2
 */
 class Program2
 {
@@ -12,12 +13,6 @@ class Program2
 		{ "blue", Color.Blue }
 	};
 
-	static Dictionary<Color, int> constraint = new Dictionary<Color, int>
-	{
-		{ Color.Red, 12 },
-		{ Color.Green, 13 },
-		{ Color.Blue, 14 }
-	};
 
 	static void Main()
 
@@ -27,13 +22,13 @@ class Program2
 		{
 			// Read file using StreamReader. Reads file line by line
 			using StreamReader file = new StreamReader(path);
-			//int counter = 0;
-			bool isPossible = true;
-			int sumOfPossibleGameIds = 0;
+			int counter = 0;
+			int sumOfPowers = 0;
 
 			Regex gameIdPattern = new Regex(@"^Game (\d+)", RegexOptions.Compiled | RegexOptions.IgnoreCase);
 			while (file.ReadLine() is { } ln)
 			{
+				Dictionary<Color, int> minSpecForThisGame = new Dictionary<Color, int>();
 
 				var gameId = Int32.Parse(gameIdPattern.Match(ln).Groups[1].Captures[0].Value);
 				Console.WriteLine($"processing {gameId}: " + ln);
@@ -43,38 +38,34 @@ class Program2
 				{
 					var cubePattern = new Regex(@"(\d+) " + colorString, RegexOptions.Compiled | RegexOptions.IgnoreCase);
 					//get the matches in this line
+					int numberOfThisColorNeeded = 0;
 					foreach (Match match in cubePattern.Matches(ln))
 					{
 						//Console.WriteLine("matched "+match.Value);
 						int matchedNumber = Int32.Parse(match.Groups[1].Captures[0].Value);
-						//if this match makes the game impossible then break
-						isPossible = matchedNumber <= constraint[colorLookup[colorString]];
+						numberOfThisColorNeeded = Math.Max(numberOfThisColorNeeded, matchedNumber);
 
-						if (!isPossible) break;
 					}
-
-					//if this color makes the game impossible then break
-					if (!isPossible)
-					{
-						Console.WriteLine($"Color " + colorString +
-						                  $" makes game id {gameId} impossible, sum is now {sumOfPossibleGameIds}");
-						break;
-					}
+					Console.WriteLine(colorString+" cubes needed for this game: "+numberOfThisColorNeeded);
+					minSpecForThisGame.Add(colorLookup[colorString], numberOfThisColorNeeded);
 
 				}
-
-				//after all the colors are processed for this line
-				if (isPossible)
+				
+				//find the "power" for this game, which is the product of all three colors' minimum needed, r*g*b
+				int powerOfThisGame = 1;
+				foreach (Color color in minSpecForThisGame.Keys)
 				{
-					sumOfPossibleGameIds += gameId;
-					Console.WriteLine($"Game id {gameId} is possible, sum is now {sumOfPossibleGameIds}");
+					powerOfThisGame *= minSpecForThisGame[color];
 				}
+				Console.WriteLine($"Power of this game is {powerOfThisGame}");
+				sumOfPowers += powerOfThisGame;
 
-				//counter++;
+				counter++;
 
 			}
 
 			file.Close();
+			Console.WriteLine($"Sum of powers is {sumOfPowers}");
 		}
 		else
 		{
