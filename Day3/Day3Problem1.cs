@@ -14,7 +14,7 @@ namespace Day3
 {
 	class Day3Problem1
 	{
-		static void Main()
+		static void MainOld()
 		{
 			List<MatchCollection> symbolMatches = new List<MatchCollection>();
 			int sumOfPartNumbers = 0;
