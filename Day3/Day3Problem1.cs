@@ -1,4 +1,14 @@
 ﻿using System.Text.RegularExpressions;
+/*
+ * https://adventofcode.com/2023/day/3
+ * either turn input into a vast 2d array and write a custom comparator, or
+ * use regexes and match indices which works out to nearly the same thing
+ *
+ * 0) what is a symbol? Anything that *isn't* a digit or .
+ * 1) match any group of digits
+ * 2) get indices of symbols in line n-1, n, n+1; check if there's a symbol between
+ *		(index of matched digits-1) and (index of matched digits+match length+1)
+ */
 
 namespace Day3
 {
@@ -7,6 +17,7 @@ namespace Day3
 		static void Main()
 		{
 			List<MatchCollection> symbolMatches = new List<MatchCollection>();
+			int sumOfPartNumbers = 0;
 			
 			var path = Path.Combine(Directory.GetCurrentDirectory(), "input.txt");
 			if (File.Exists(path))
@@ -15,16 +26,6 @@ namespace Day3
 				using StreamReader file = new StreamReader(path);
 				int counter = 0;
 
-				/*
-				 * either turn input into a vast 2d array and write a custom comparator, or
-				 * use regexes and match indices which works out to nearly the same thing
-				 *
-				 * 0) what is a symbol? Anything that *isn't* a digit or .
-				 * 1) match any group of digits
-				 * 2) get indices of symbols in line n-1, n, n+1; check if there's a symbol between
-				 *		(index of matched digits-1) and (index of matched digits+match length+1)
-				 */
-
 				Regex symbolPattern = new Regex(@"[^0123456789\.]",
 					RegexOptions.Compiled | RegexOptions.IgnoreCase);
 				Regex partNumberPattern = new Regex(@"(\d+)",
@@ -32,7 +33,7 @@ namespace Day3
 
 				//there is probably a way to do this that only goes through the input file once, but
 				//make it work then make it better
-				while (file.ReadLine() is { } ln && counter < 5)
+				while (file.ReadLine() is { } ln)
 				{
 					//Console.WriteLine($"processing line {counter}: " + ln);
 					// foreach (Match match in symbolPattern.Matches(ln))
@@ -51,28 +52,31 @@ namespace Day3
 				counter = 0;
 				int firstIndexToCheckForSymbol = -1;
 				int lastIndexToCheckForSymbol = -1;
-				while (file.ReadLine() is { } ln && counter < 4)
+				while (file.ReadLine() is { } ln)
 				{
-					Console.WriteLine($"processing line {counter}: " + ln);
+					//Console.WriteLine($"processing line {counter}: " + ln);
 					foreach (Match match in partNumberPattern.Matches(ln))
 					{
 						
 						firstIndexToCheckForSymbol = (Math.Max(0, match.Index - 1));
 						lastIndexToCheckForSymbol = match.Index + match.Value.Length;
-						Console.WriteLine("part number pattern matched "+match.Value+
-						                  $", first index {firstIndexToCheckForSymbol}"+
-						                  $", last index {lastIndexToCheckForSymbol}");
+						// Console.WriteLine("part number pattern matched "+match.Value+
+						//                   $", first index {firstIndexToCheckForSymbol}"+
+						//                   $", last index {lastIndexToCheckForSymbol}");
+						
 						//check lines n-1, n, n+1 for nearby symbols
 						for (int i = Math.Max(0, counter-1); i <= Math.Min(indexOfLastLineRead, counter+1); i++)
 						{
-							Console.WriteLine($"checking symbols in line {i}");
+							//Console.WriteLine($"checking symbols in line {i}");
 
 							foreach (Match symbolMatch in symbolMatches[i])
 							{
 								if (symbolMatch.Index >= firstIndexToCheckForSymbol &&
 								    symbolMatch.Index <= lastIndexToCheckForSymbol)
 								{
-									Console.WriteLine($"found an adjacent symbol on line {i}: "+symbolMatch.Value);
+									//Console.WriteLine($"found an adjacent symbol on line {i}: "+symbolMatch.Value);
+									sumOfPartNumbers += Int32.Parse(match.Value);
+									break;
 								}
 							}
 						}
@@ -81,6 +85,7 @@ namespace Day3
 
 					counter++;
 				}
+				Console.WriteLine($"Sum of valid part numbers is {sumOfPartNumbers}");
 
 				file.Close();
 			}
