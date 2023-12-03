@@ -6,7 +6,10 @@
  * 1) match the literal *
  * 2) get indices of part numbers in line n-1, n, n+1; check if the * falls between
  *		(index of matched digits-1) and (index of matched digits+match length+1)
- * 3) count results of part 2 to see if there are two adjacent part numbers
+ * 3) count results of part 2 to see if there are exactly two adjacent part numbers
+ *
+ * incorrect answer: 97997133
+ * correct answer! 78826761
  */
 
 namespace Day3
@@ -49,11 +52,12 @@ namespace Day3
 				{
 					foreach (Match asteriskMatch in asteriskPattern.Matches(ln))
 					{
+						List<int> matchingParts = new List<int>();
+						Console.WriteLine($"checking for parts near * on line {counter} at index {asteriskMatch.Index}");
+						
 						//check lines n-1, n, n+1 for nearby symbols
 						for (int i = Math.Max(0, counter-1); i <= Math.Min(indexOfLastLineRead, counter+1); i++)
 						{
-							//Console.WriteLine($"checking symbols in line {i}");
-							List<int> matchingParts = new List<int>();
 							foreach (Match partNumberMatch in partNumberMatches[i])
 							{
 								firstIndexToCheckForAsterisk = (Math.Max(0, partNumberMatch.Index - 1));
@@ -63,24 +67,26 @@ namespace Day3
 								    asteriskMatch.Index <= lastIndexToCheckForAsterisk)
 								{
 									matchingParts.Add(Int32.Parse(partNumberMatch.Value));
-									Console.WriteLine($"found an adjacent part on line {i}: "+partNumberMatch.Value);
+									//Console.WriteLine($"found an adjacent part on line {i}: "+partNumberMatch.Value);
 
-									Console.Write("matchingParts now contains: ");
+									//Console.Write("matchingParts now contains: ");
 									matchingParts.ForEach(x => Console.Write(x+", "));
 									Console.WriteLine();
 								}
 								
 							}
 
-							if (matchingParts.Count == 2)
-							{
-								//what happens if a * is adjacent to three part numbers?
-								Console.WriteLine("found at least two matching parts; this is a gear");
-								sumOfGearRatios += matchingParts[0] * matchingParts[1];
-							}
-							
 						}
-						
+						if (matchingParts.Count == 2)
+						{
+							//what happens if a * is adjacent to three part numbers?
+							Console.WriteLine("found at least two matching parts; this is a gear");
+							sumOfGearRatios += matchingParts[0] * matchingParts[1];
+						}
+						else
+						{
+							Console.WriteLine("this is NOT a gear");
+						}						
 					}
 
 					counter++;
