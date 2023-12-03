@@ -34,15 +34,17 @@ namespace Day3
 				//make it work then make it better
 				while (file.ReadLine() is { } ln && counter < 5)
 				{
-					Console.WriteLine($"processing line: " + ln);
-					foreach (Match match in symbolPattern.Matches(ln))
-					{
-						Console.WriteLine("symbol pattern matched "+match.Value+" at index "+match.Index);
-					}
+					//Console.WriteLine($"processing line {counter}: " + ln);
+					// foreach (Match match in symbolPattern.Matches(ln))
+					// {
+					// 	Console.WriteLine("symbol pattern matched "+match.Value+" at index "+match.Index);
+					// }
 					symbolMatches.Add(symbolPattern.Matches(ln));
 
 					counter++;
 				}
+
+				int indexOfLastLineRead = counter - 1;
 				//restart StreamReader at beginning of file
 				file.DiscardBufferedData();
 				file.BaseStream.Seek(0, SeekOrigin.Begin);
@@ -51,7 +53,7 @@ namespace Day3
 				int lastIndexToCheckForSymbol = -1;
 				while (file.ReadLine() is { } ln && counter < 4)
 				{
-					Console.WriteLine($"processing line: " + ln);
+					Console.WriteLine($"processing line {counter}: " + ln);
 					foreach (Match match in partNumberPattern.Matches(ln))
 					{
 						
@@ -60,15 +62,21 @@ namespace Day3
 						Console.WriteLine("part number pattern matched "+match.Value+
 						                  $", first index {firstIndexToCheckForSymbol}"+
 						                  $", last index {lastIndexToCheckForSymbol}");
-						//check same line
-						foreach (Match symbolMatch in symbolMatches[counter])
+						//check lines n-1, n, n+1 for nearby symbols
+						for (int i = Math.Max(0, counter-1); i <= Math.Min(indexOfLastLineRead, counter+1); i++)
 						{
-							if (symbolMatch.Index >= firstIndexToCheckForSymbol &&
-							    symbolMatch.Index <= lastIndexToCheckForSymbol)
+							Console.WriteLine($"checking symbols in line {i}");
+
+							foreach (Match symbolMatch in symbolMatches[i])
 							{
-								Console.WriteLine("found an adjacent symbol on same line: "+symbolMatch.Value);
+								if (symbolMatch.Index >= firstIndexToCheckForSymbol &&
+								    symbolMatch.Index <= lastIndexToCheckForSymbol)
+								{
+									Console.WriteLine($"found an adjacent symbol on line {i}: "+symbolMatch.Value);
+								}
 							}
 						}
+						
 					}
 
 					counter++;
