@@ -4,6 +4,8 @@
  * use c# list comparison to count winning numbers per line
  * get 2^n-1 points for number of winners each line
  * sum
+ *
+ * Chose to do this with a fancy regexp, probably would have been faster using split after all
  */
 
 namespace Day4
