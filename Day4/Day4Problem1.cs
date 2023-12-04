@@ -14,8 +14,7 @@ namespace Day4
 		{
 			
 			int sumOfPointsForAlLCards = 0;
-			const string listSeparator = "|";
-			Regex numbersPattern = new Regex(@"(?:.*\:\s)(?:(\d+)+\s+)+(?:\|\s)(?:(\d+)+\s+)+",
+			Regex numbersPattern = new Regex(@"(?:.*\:\s+)(?:(\d+)+\s+)+(?:\|\s+)(?:(\d+)+(?:\s|\n)+)+",
 				RegexOptions.Compiled | RegexOptions.IgnoreCase);
 			
 			var path = Path.Combine(Directory.GetCurrentDirectory(), "input.txt");
@@ -23,27 +22,45 @@ namespace Day4
 			{
 				using StreamReader file = new StreamReader(path);
 				int counter = 0;
-				while (file.ReadLine() is { } ln && counter < 5)
+				while (file.ReadLine() is { } ln)
 				{
 					Console.WriteLine($"processing line {counter}: " + ln);
-					foreach (Group winningNumberMatchGroup in numbersPattern.Match(ln).Groups)
+					ln = String.Concat(ln, " ");
+					float pointsForThisCard = 0.5f;
+					
+					List<int> winningNumbers = new List<int>();
+					List<int> scratchedOffNumbers = new List<int>();
+
+					//Group 0 has the whole string, Group 1 has the winning numbers, Group 2 has the scratched numbers
+					Console.Write("Winning numbers: ");
+					foreach (Capture capture in numbersPattern.Match(ln).Groups[1].Captures)
 					{
-						//Group 1 has the whole string, Group 2 has the winning numbers, Group 3 has the scratched numbers
-						Console.WriteLine("Processing group");
-						foreach (Capture capture in winningNumberMatchGroup.Captures)
-						{
-							Console.Write(capture.Value + ", ");
-						}
-						Console.WriteLine();
+						Console.Write(capture.Value + ", ");
+						winningNumbers.Add(Int32.Parse(capture.Value));
 					}
 					Console.WriteLine();
-
-
-
-					string[] splitLine = ln.Split(listSeparator);
-					List<string> winningNumbers = new List<string>(splitLine[0].Split(" "));
-					List<string> scratchedOffNumbers = new List<string>(splitLine[1].Split(" "));
 					
+					Console.Write("Scratched off numbers: ");
+					foreach (Capture capture in numbersPattern.Match(ln).Groups[2].Captures)
+					{
+						Console.Write(capture.Value + ", ");
+						scratchedOffNumbers.Add(Int32.Parse(capture.Value));
+					}
+					Console.WriteLine();
+					//TIL: this does not at all do what it looks like it does
+					//List<int> commonNumbers = winningNumbers.Intersect(scratchedOffNumbers).ToList();
+					IEnumerable<int> commonNumbers = winningNumbers.Intersect(scratchedOffNumbers);
+					Console.Write("common numbers: ");
+					foreach (int number in commonNumbers)
+					{
+						Console.Write(number + ", ");
+						pointsForThisCard *= 2;
+					}
+					Console.WriteLine("points for this card: "+pointsForThisCard);
+					if (pointsForThisCard > .6f)
+					{
+						sumOfPointsForAlLCards += (int) pointsForThisCard;
+					}
 
 					counter++;
 				}
