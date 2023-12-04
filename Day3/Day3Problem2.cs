@@ -33,8 +33,6 @@ namespace Day3
 				Regex partNumberPattern = new Regex(@"(\d+)",
 					RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
-				//there is probably a way to do this that only goes through the input file once, but
-				//make it work then make it better
 				while (file.ReadLine() is { } ln)
 				{
 					partNumberMatches.Add(partNumberPattern.Matches(ln));
@@ -53,8 +51,6 @@ namespace Day3
 					foreach (Match asteriskMatch in asteriskPattern.Matches(ln))
 					{
 						List<int> matchingParts = new List<int>();
-						Console.WriteLine($"checking for parts near * on line {counter} at index {asteriskMatch.Index}");
-						
 						//check lines n-1, n, n+1 for nearby symbols
 						for (int i = Math.Max(0, counter-1); i <= Math.Min(indexOfLastLineRead, counter+1); i++)
 						{
@@ -64,29 +60,16 @@ namespace Day3
 								lastIndexToCheckForAsterisk = partNumberMatch.Index + partNumberMatch.Length;
 								
 								if (asteriskMatch.Index >= firstIndexToCheckForAsterisk &&
-								    asteriskMatch.Index <= lastIndexToCheckForAsterisk)
-								{
+								    asteriskMatch.Index <= lastIndexToCheckForAsterisk) {
 									matchingParts.Add(Int32.Parse(partNumberMatch.Value));
-									//Console.WriteLine($"found an adjacent part on line {i}: "+partNumberMatch.Value);
-
-									//Console.Write("matchingParts now contains: ");
-									matchingParts.ForEach(x => Console.Write(x+", "));
-									Console.WriteLine();
 								}
-								
 							}
 
 						}
 						if (matchingParts.Count == 2)
 						{
-							//what happens if a * is adjacent to three part numbers?
-							Console.WriteLine("found at least two matching parts; this is a gear");
 							sumOfGearRatios += matchingParts[0] * matchingParts[1];
-						}
-						else
-						{
-							Console.WriteLine("this is NOT a gear");
-						}						
+						}				
 					}
 
 					counter++;
