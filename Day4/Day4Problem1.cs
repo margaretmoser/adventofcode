@@ -12,7 +12,7 @@ namespace Day4
 {
 	class Day4Problem1
 	{
-		static void Main()
+		static void MainOld()
 		{
 			
 			int sumOfPointsForAlLCards = 0;
