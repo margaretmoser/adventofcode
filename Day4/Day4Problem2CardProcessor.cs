@@ -1,9 +1,9 @@
-﻿using System.Text.RegularExpressions;
+﻿using System.Security.Cryptography;
+using System.Text.RegularExpressions;
 /*
  * https://adventofcode.com/2023/day/4
  * use c# list comparison to count winning numbers per line
  * for each winning number, get a copy of the next card after this one, continue until no winning numbers
- * ugh, recursion
  *
  */
 
@@ -13,13 +13,19 @@ namespace Day4
 	{
 
 		int totalNumberOfCards = 0;
-		private List<CardData> cards = new List<CardData>();
+		//standard C# dictionaries do not guarantee key order but it matters here
+		private SortedDictionary<int, int> cardNumberToWinCount;
+		private SortedDictionary<int, int> cardCounts;
+		
 		public void Run()
 		{
-			ProcessFile();
+			cardNumberToWinCount = new SortedDictionary<int, int>();
+			cardCounts = new SortedDictionary<int, int>();
+			GetCardWinCounts();
+			ProcessCardCopies();
 		}
 		
-		private void ProcessFile()
+		private void GetCardWinCounts()
 		{
 			Regex numbersPattern = new Regex(@"(?:.*\:\s+)(?:(\d+)+\s+)+(?:\|\s+)(?:(\d+)+(?:\s|\n)+)+",
 				RegexOptions.Compiled | RegexOptions.IgnoreCase);
@@ -28,10 +34,13 @@ namespace Day4
 			{
 				using StreamReader file = new StreamReader(path);
 				int counter = 0;
-				while (file.ReadLine() is { } ln && counter < 5)
+				
+				while (file.ReadLine() is { } ln)
+				//DEBUG VERSION
+				//while (file.ReadLine() is { } ln && counter < 5)
 				{
 					//turn this into a function so that it can recur
-					Console.WriteLine($"processing line {counter}: " + ln);
+					//Console.WriteLine($"processing line {counter}: " + ln);
 					ln = String.Concat(ln, " ");
 					
 					List<int> winningNumbers = new List<int>();
@@ -45,15 +54,13 @@ namespace Day4
 					{ scratchedOffNumbers.Add(Int32.Parse(capture.Value)); }
 					
 					IEnumerable<int> commonNumbers = winningNumbers.Intersect(scratchedOffNumbers);
-					Console.Write("common numbers found: ");
-					foreach (int commonNumber in commonNumbers)
-					{
-						Console.Write(commonNumber+", ");
-					}
-					Console.WriteLine();
-					CardData newCardData = new CardData(counter, commonNumbers.Count());
-					Console.WriteLine($"created card data {newCardData}");
-					cards.Add(newCardData);
+					// Console.Write("common numbers found: ");
+					// foreach (int commonNumber in commonNumbers)
+					// {
+					// 	Console.Write(commonNumber+", ");
+					// }
+					// Console.WriteLine();
+					cardNumberToWinCount.Add(counter, commonNumbers.Count());
 					counter++;
 				}
 
@@ -66,19 +73,39 @@ namespace Day4
 			
 		}
 
-
-		public struct CardData
+		private void ProcessCardCopies()
 		{
-			public CardData(int lineNo, int numWinners)
+			//one copy of each card initially
+			for (int i = 0; i < cardNumberToWinCount.Count; i++)
+			//DEBUG VERSION
+			// for (int i = 0; i < 100; i++)
 			{
-				lineNumber = lineNo;
-				numberOfWinners = numWinners;
+				cardCounts.Add(i, 1);
+			}
+			foreach (int lineNumber in cardNumberToWinCount.Keys)
+			{
+				
+				// Console.WriteLine($"line number {lineNumber} has {cardNumberToWinCount[lineNumber]} winners");
+				// Console.WriteLine($"processing {cardCounts[lineNumber]} copies of this card");
+				
+				for (int i = 0; i < cardCounts[lineNumber]; i++)
+				{
+					// Console.WriteLine($"processing {i}th copy");
+					for (int j = lineNumber + 1; j <= lineNumber + cardNumberToWinCount[lineNumber]; j++)
+					{
+						// Console.WriteLine($"incrementing card count for card {j}");
+						cardCounts[j]++;
+					}
+				}
 			}
 
-			public int lineNumber;
-			public int numberOfWinners;
-			public override string ToString() => $"({lineNumber}, {numberOfWinners})";
-		}
+			foreach (int lineNumber in cardCounts.Keys)
+			{
+				Console.WriteLine($"card count for line {lineNumber} is {cardCounts[lineNumber]}");
+			}
 			
+		}
+
+
 	}
 }
