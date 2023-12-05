@@ -39,7 +39,6 @@ namespace Day4
 				//DEBUG VERSION
 				//while (file.ReadLine() is { } ln && counter < 5)
 				{
-					//turn this into a function so that it can recur
 					//Console.WriteLine($"processing line {counter}: " + ln);
 					ln = String.Concat(ln, " ");
 					
@@ -54,12 +53,6 @@ namespace Day4
 					{ scratchedOffNumbers.Add(Int32.Parse(capture.Value)); }
 					
 					IEnumerable<int> commonNumbers = winningNumbers.Intersect(scratchedOffNumbers);
-					// Console.Write("common numbers found: ");
-					// foreach (int commonNumber in commonNumbers)
-					// {
-					// 	Console.Write(commonNumber+", ");
-					// }
-					// Console.WriteLine();
 					cardNumberToWinCount.Add(counter, commonNumbers.Count());
 					counter++;
 				}
@@ -102,8 +95,9 @@ namespace Day4
 			foreach (int lineNumber in cardCounts.Keys)
 			{
 				Console.WriteLine($"card count for line {lineNumber} is {cardCounts[lineNumber]}");
+				totalNumberOfCards += cardCounts[lineNumber];
 			}
-			
+			Console.WriteLine($"totalNumberOfCards is {totalNumberOfCards}");
 		}
 
 
