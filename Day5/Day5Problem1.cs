@@ -27,27 +27,28 @@ public class Day5Problem1
 	void MapSeeds()
 	{
 		long thisLocation;
-		// foreach (long seed in seeds)
-		// {
-			// long currentSrcValue = seed;
-			long seed;
-			long currentSrcValue = seed = seeds[0];
+		foreach (long seed in seeds)
+		{
+			long currentSrcValue = seed;
 			foreach (List<AlmanacMap> thisMapList in listOfMaps)
 			{
 				foreach (AlmanacMap map in thisMapList)
 				{
-					Console.WriteLine($"checking value {currentSrcValue} versus map "+map.ToString());
-					if (currentSrcValue >= map.srcMin && currentSrcValue < map.srcMin+map.offset)
+					if (currentSrcValue >= map.srcMin && currentSrcValue < map.srcMin+map.rangeSize)
 					{
 						long newValue = (currentSrcValue - map.srcMin) + map.destMin;
-						Console.WriteLine($"found mapping, changing lookup value from {currentSrcValue} to {newValue}");
+						//Console.WriteLine($"found mapping, changing lookup value from {currentSrcValue} to {newValue}");
 						currentSrcValue = newValue;
 						break;
 					}
 				}
-			// }
-			Console.WriteLine($"final value after lookups for seed {seed} is {currentSrcValue}");
-			nearestLocation = Math.Min(nearestLocation, currentSrcValue);
+			}
+			//Console.WriteLine($"final value after lookups for seed {seed} is {currentSrcValue}");
+			if (nearestLocation == 0 || currentSrcValue < nearestLocation)
+			{
+				nearestLocation = currentSrcValue;
+			}
+			Console.WriteLine($"nearest location is now {nearestLocation}");
 		}
 		Console.WriteLine($"nearest location is {nearestLocation}");
 	}
@@ -56,11 +57,9 @@ public class Day5Problem1
 	{
 		Regex seedsPattern = new Regex(@"(?:.*\:\s+)(?:(\d+)(?:\s))+",
 			RegexOptions.Compiled | RegexOptions.IgnoreCase);
-			
 		string? seedLine = file.ReadLine();
 		foreach (Capture seed in seedsPattern.Match(seedLine).Groups[1].Captures)
 		{
-			//Console.WriteLine($"capture: {seed.Value}");
 			seeds.Add(long.Parse(seed.Value));
 		}
 	}
@@ -69,14 +68,13 @@ public class Day5Problem1
 	{
 		Regex startOfNewSectionPattern = new Regex(@"(.*)\smap\:",
 			RegexOptions.Compiled | RegexOptions.IgnoreCase);
-			
 		Regex rangeMapPattern = new Regex(@"(\d+)");
 		int counter = 2;
 		List<AlmanacMap> thisMap = new List<AlmanacMap>();
 		string nameOfMap = "";
+		
 		while (file.ReadLine() is { } ln)
 		{
-			//Console.WriteLine("processing line "+counter+" with value "+ln);
 			if (startOfNewSectionPattern.IsMatch(ln))
 			{
 				nameOfMap = startOfNewSectionPattern.Match(ln).Groups[1].Value;
@@ -84,7 +82,6 @@ public class Day5Problem1
 				thisMap = new List<AlmanacMap>();
 				listOfMaps.Add(thisMap);
 			} else if (rangeMapPattern.IsMatch(ln)) {
-				//line contains a range map
 				MatchCollection matches = rangeMapPattern.Matches(ln);
 				AlmanacMap newRangeMap = new AlmanacMap(
 					nameOfMap,
@@ -99,22 +96,21 @@ public class Day5Problem1
 
 	struct AlmanacMap
 	{
-		public AlmanacMap(string nme, long dMin, long sMin, long offs)
+		public AlmanacMap(string nme, long dMin, long sMin, long sz)
 		{
 			name = nme;
 			destMin = dMin;
 			srcMin = sMin;
-			offset = offs;
+			rangeSize = sz;
 		}
 
 		public string name;
 		public long destMin;
 		public long srcMin;
-		public long offset;
-		
+		public long rangeSize;
 
 		public override string ToString() =>
-			$"name: {name}, destMin: {destMin}, srcMin: {srcMin}, offset: {offset}";
+			$"name: {name}, destMin: {destMin}, srcMin: {srcMin}, offset: {rangeSize}";
 	}
 	
 }
