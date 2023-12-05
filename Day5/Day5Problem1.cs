@@ -30,43 +30,29 @@ public class Day5Problem1
 				//Console.WriteLine($"capture: {seed.Value}");
 				seeds.Add(long.Parse(seed.Value));
 			}
-			
-			while (file.ReadLine() is { } ln && counter < 40)
+
+			List<AlmanacMap> thisMap = new List<AlmanacMap>();
+			while (file.ReadLine() is { } ln)
 			{
 				Console.WriteLine("processing line "+counter+" with value "+ln);
 				if (startOfNewSectionPattern.IsMatch(ln))
 				{
-					Console.WriteLine("********" + startOfNewSectionPattern.Match(ln).Groups[1].Value);
-					List<AlmanacMap> thisMap = new List<AlmanacMap>();
+					Console.WriteLine("********" + startOfNewSectionPattern.Match(ln).Groups[1].Value); 
+					thisMap = new List<AlmanacMap>();
 					listOfMaps.Add(thisMap);
-				} else {
+				} else if (rangeMapPattern.IsMatch(ln)) {
 					//line contains a range map
 					MatchCollection matches = rangeMapPattern.Matches(ln);
-					//I'm sure there's a better way
-					int nothing = matches.Count;
 					AlmanacMap newRangeMap = new AlmanacMap(
 						long.Parse(matches[1].Value), long.Parse(matches[1].Value) + long.Parse(matches[2].Value),
 						long.Parse(matches[2].Value), long.Parse(matches[0].Value));
-					int otherCounter = 0;
-					foreach (Match match in matches)
-					{
-						
-						Console.WriteLine($"matches[{otherCounter}] is {matches[otherCounter].Value}");
-						Console.WriteLine($"found match {match}, otherCounter is {otherCounter}");
-						otherCounter++;
-						
-					}
-
-					Console.WriteLine();
+					thisMap.Add(newRangeMap);
 				}
 				counter++;
 			}
 			file.Close();
 		}
-		else
-		{
-			Console.WriteLine($"no file found at {path}");
-		}
+		else { Console.WriteLine($"no file found at {path}"); }
 
 	}
 
