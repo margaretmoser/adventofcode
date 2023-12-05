@@ -1,5 +1,4 @@
-﻿using System.Text.RegularExpressions;
-/*
+﻿/*
  * https://adventofcode.com/2023/day/4
  * use c# list comparison to count winning numbers per line
  * for each winning number, add a copy of the next card after this one, continue until no winning numbers

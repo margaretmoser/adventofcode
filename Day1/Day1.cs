@@ -1,7 +1,4 @@
-﻿using System;
-using System.IO;
-using System.Text.RegularExpressions;
-using System.Collections;
+﻿using System.Text.RegularExpressions;
 
 List<int> collatedDigitsFromEachLine = new List<int>();
 
