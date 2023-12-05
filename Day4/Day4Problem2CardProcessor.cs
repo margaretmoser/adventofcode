@@ -1,26 +1,17 @@
-﻿using System.Security.Cryptography;
-using System.Text.RegularExpressions;
-/*
- * https://adventofcode.com/2023/day/4
- * use c# list comparison to count winning numbers per line
- * for each winning number, get a copy of the next card after this one, continue until no winning numbers
- *
- */
+﻿using System.Text.RegularExpressions;
 
 namespace Day4
 {
 	class Day4Problem2CardProcessor
 	{
 
-		int totalNumberOfCards = 0;
+		private int _totalNumberOfCards;
 		//standard C# dictionaries do not guarantee key order but it matters here
-		private SortedDictionary<int, int> cardNumberToWinCount;
-		private SortedDictionary<int, int> cardCounts;
+		private SortedDictionary<int, int> _cardNumberToWinCount = new SortedDictionary<int, int>();
+		private SortedDictionary<int, int> _cardCounts = new SortedDictionary<int, int>();
 		
 		public void Run()
 		{
-			cardNumberToWinCount = new SortedDictionary<int, int>();
-			cardCounts = new SortedDictionary<int, int>();
 			GetCardWinCounts();
 			ProcessCardCopies();
 		}
@@ -36,10 +27,7 @@ namespace Day4
 				int counter = 0;
 				
 				while (file.ReadLine() is { } ln)
-				//DEBUG VERSION
-				//while (file.ReadLine() is { } ln && counter < 5)
 				{
-					//Console.WriteLine($"processing line {counter}: " + ln);
 					ln = String.Concat(ln, " ");
 					
 					List<int> winningNumbers = new List<int>();
@@ -53,51 +41,39 @@ namespace Day4
 					{ scratchedOffNumbers.Add(Int32.Parse(capture.Value)); }
 					
 					IEnumerable<int> commonNumbers = winningNumbers.Intersect(scratchedOffNumbers);
-					cardNumberToWinCount.Add(counter, commonNumbers.Count());
+					_cardNumberToWinCount.Add(counter, commonNumbers.Count());
 					counter++;
 				}
 
 				file.Close();
 			}
-			else
-			{
-				Console.WriteLine($"no file found at {path}");
-			}
+			else { Console.WriteLine($"no file found at {path}"); }
 			
 		}
 
 		private void ProcessCardCopies()
 		{
 			//one copy of each card initially
-			for (int i = 0; i < cardNumberToWinCount.Count; i++)
-			//DEBUG VERSION
-			// for (int i = 0; i < 100; i++)
+			for (int i = 0; i < _cardNumberToWinCount.Count; i++)
 			{
-				cardCounts.Add(i, 1);
+				_cardCounts.Add(i, 1);
 			}
-			foreach (int lineNumber in cardNumberToWinCount.Keys)
+			foreach (int lineNumber in _cardNumberToWinCount.Keys)
 			{
-				
-				// Console.WriteLine($"line number {lineNumber} has {cardNumberToWinCount[lineNumber]} winners");
-				// Console.WriteLine($"processing {cardCounts[lineNumber]} copies of this card");
-				
-				for (int i = 0; i < cardCounts[lineNumber]; i++)
+				for (int i = 0; i < _cardCounts[lineNumber]; i++)
 				{
-					// Console.WriteLine($"processing {i}th copy");
-					for (int j = lineNumber + 1; j <= lineNumber + cardNumberToWinCount[lineNumber]; j++)
+					for (int j = lineNumber + 1; j <= lineNumber + _cardNumberToWinCount[lineNumber]; j++)
 					{
-						// Console.WriteLine($"incrementing card count for card {j}");
-						cardCounts[j]++;
+						_cardCounts[j]++;
 					}
 				}
 			}
 
-			foreach (int lineNumber in cardCounts.Keys)
+			foreach (int lineNumber in _cardCounts.Keys)
 			{
-				Console.WriteLine($"card count for line {lineNumber} is {cardCounts[lineNumber]}");
-				totalNumberOfCards += cardCounts[lineNumber];
+				_totalNumberOfCards += _cardCounts[lineNumber];
 			}
-			Console.WriteLine($"totalNumberOfCards is {totalNumberOfCards}");
+			Console.WriteLine($"totalNumberOfCards is {_totalNumberOfCards}");
 		}
 
 

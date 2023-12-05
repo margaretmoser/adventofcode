@@ -5,7 +5,7 @@
  * get 2^n-1 points for number of winners each line
  * sum
  *
- * Chose to do this with a fancy regexp, probably would have been faster using split after all
+ * Learned about: fancier regexp with matching/non-matching groups, List.Intersect weirdness
  */
 
 namespace Day4
