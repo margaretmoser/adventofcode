@@ -17,8 +17,10 @@ namespace Day5
 	{
 		static void Main()
 		{
-			Day5Problem1 problem1 = new Day5Problem1();
-			problem1.Run();
+			// Day5Problem1 problem1 = new Day5Problem1();
+			// problem1.Run();
+			Day5Problem2 problem2 = new Day5Problem2();
+			problem2.Run();
 		}
 			
 	}
