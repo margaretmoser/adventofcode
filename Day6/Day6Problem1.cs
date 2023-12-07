@@ -21,16 +21,34 @@ public class Day6Problem1
 			int thisRaceSolutions = GetSolutionsForRace(time, races[time]);
 			productOfAllRaces *= thisRaceSolutions;
 		}
+		Console.WriteLine($"product of all races is {productOfAllRaces}");
 	}
 
-	int GetSolutionsForRace(int time, int distance)
+	int GetSolutionsForRace(int totalTime, int distance)
 	{
-		return 0;
+		double firstRoot = QuadForm(-1, totalTime, -distance, true);
+		double secondRoot = QuadForm(-1, totalTime, -distance, false);
+
+		Console.WriteLine($"for time {totalTime} and distance {distance}, first root is {firstRoot} and second root is {secondRoot}");
+		return (int)Math.Ceiling(secondRoot) - (int)Math.Ceiling(firstRoot);
+	}
+	static double QuadForm(int a, int b, int c, bool pos)
+	{
+		var preRoot = b * b - 4 * a * c;
+		if (preRoot < 0)
+		{
+			return double.NaN;
+		}
+		else
+		{
+			var sgn = pos ? 1.0 : -1.0;
+			return (sgn * Math.Sqrt(preRoot) - b) / (2.0 * a);
+		}
 	}
 	
 	void ParseRaces()
 	{
-		Regex numbersPattern = new Regex(@"(?:.*\:\s+)(?:(\d+)+\s+)+",
+		Regex numbersPattern = new Regex(@"(?:.*\:\s+)(?:(\d+)+\s*)+",
 			RegexOptions.Compiled | RegexOptions.IgnoreCase);
 		var path = Path.Combine(Directory.GetCurrentDirectory(), "input.txt");
 		if (File.Exists(path))
@@ -45,6 +63,7 @@ public class Day6Problem1
 			{
 				races.Add(Int32.Parse(time.Value), Int32.Parse(distances[counter].Value));
 				Console.WriteLine($"added time {time} and distance {distances[counter].Value}");
+				counter++;
 			}
 			
 			file.Close();
