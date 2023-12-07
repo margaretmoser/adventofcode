@@ -26,19 +26,20 @@ public class Day5Problem1
 
 	void MapSeeds()
 	{
-		//for (int indexInSeedList = 0; indexInSeedList < seeds.Count; indexInSeedList += 2)
-		for (int indexInSeedList = 0; indexInSeedList < 2; indexInSeedList += 2)
+		for (int indexInSeedList = 0; indexInSeedList < seeds.Count; indexInSeedList += 2)
+		//for (int indexInSeedList = 0; indexInSeedList < 2; indexInSeedList += 2)
 		{
 			long firstSeed = seeds[indexInSeedList];
-			long secondSeed = seeds[indexInSeedList+1];
-			Console.WriteLine($"firstSeed is {firstSeed}; secondSeed is {secondSeed}");
+			long seedRangeSize = seeds[indexInSeedList+1];
+			Console.WriteLine($"-------------------------firstSeed is {firstSeed}; seedRangeSize is {seedRangeSize}");
 
-			for (long currentSeed = firstSeed; currentSeed <= firstSeed+secondSeed; currentSeed++)
+			for (long currentSeed = firstSeed; currentSeed <= firstSeed+seedRangeSize; currentSeed++)
 			{
 				long currentSrcValue = currentSeed;
-				Console.WriteLine($"currentSrcValue is {currentSrcValue}");
+				//Console.WriteLine($"currentSrcValue is {currentSrcValue}");
 				foreach (List<AlmanacMap> thisMapList in listOfMaps)
 				{
+					// Console.WriteLine($"processing new map list {thisMapList}");
 					foreach (AlmanacMap map in thisMapList)
 					{
 						if (currentSrcValue >= map.srcMin && currentSrcValue < map.srcMin+map.rangeSize)
@@ -46,7 +47,7 @@ public class Day5Problem1
 							long newValue = (currentSrcValue - map.srcMin) + map.destMin;
 							//Console.WriteLine($"found mapping, changing lookup value from {currentSrcValue} to {newValue}");
 							currentSrcValue = newValue;
-							// break;
+							break;
 						}
 					}
 				}
@@ -54,12 +55,10 @@ public class Day5Problem1
 				if (nearestLocation == 0 || currentSrcValue < nearestLocation)
 				{
 					nearestLocation = currentSrcValue;
+					Console.WriteLine($"****************** nearest location changed, now {nearestLocation}");
 				}
-				Console.WriteLine($"nearest location is now {nearestLocation}");
+				
 			}
-
-			
-			
 		}
 		Console.WriteLine($"nearest location is {nearestLocation}");
 	}
