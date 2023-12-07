@@ -4,7 +4,9 @@ using System.Text.RegularExpressions;
  * Rate optimization problem. Get x seconds to either pause and build acceleration or actually move; find
  * how many different strategies (i.e. not just minimum) for pause/go would win each race, for four races
  *
- * Learned about: 
+ * Learned about: Felt surprisingly hard to turn the logic of the very simple quadratic equation into code/numeric
+ * form. Solved it on paper, then in Wolfram Alpha, then found someone's StackOverflow implementation of
+ * quadratic formula and modified it slightly. Straightforward puzzle though.
  */
 namespace Day6;
 

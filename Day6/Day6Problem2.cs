@@ -4,7 +4,7 @@ using System.Text.RegularExpressions;
  * Rate optimization problem. Get x seconds to either pause and build acceleration or actually move; find
  * how many different strategies (i.e. not just minimum) for pause/go would win each race, for four races
  *
- * Learned about: 
+ * Learned about: concatenating strings is more annoying than I remembered. Used += instead of Join or Concat.
  */
 namespace Day6;
 
