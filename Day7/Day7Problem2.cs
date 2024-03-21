@@ -12,7 +12,7 @@ public class Day7Problem2
 	public void Run()
 	{
 		processedHands = new List<HandBidTypeRank>();
-		cardValues = new List<char>() { '2', '3', '4', '5', '6', '7', '8', '9', 'T', 'J', 'Q', 'K', 'A' };
+		cardValues = new List<char>() { 'J', '2', '3', '4', '5', '6', '7', '8', '9', 'T', 'Q', 'K', 'A' };
 		LoadDataAndAssignHandType();
 		SortAllHands(processedHands);
 		CalculateTotalWinnings(processedHands);
@@ -82,24 +82,83 @@ public class Day7Problem2
 		//add logic here to deal with the new "Js are jokers" thing
 		
 		List<Tuple<string, int>> repeatsList = GroupRepeatedCharacters(hand);
+		int jCount = hand.Count(f => f == 'J');
+		
 		if (repeatsList[0].Item2 == 5)
 		{
 			return HandType.FiveOfAKind;
+			
 		} else if (repeatsList[0].Item2 == 4)
 		{
-			return HandType.FourOfAKind;
+			//XXXXJ => XXXXX, JJJJX => XXXXX
+			return (jCount >= 1) ? HandType.FiveOfAKind : HandType.FourOfAKind;
+			
 		} else if (repeatsList[0].Item2 == 3)
 		{
-			return (repeatsList[1].Item2 == 2 ? HandType.FullHouse : HandType.ThreeOfAKind);
+			if (repeatsList[1].Item2 == 2)
+			{
+				//full house
+				//XXXJJ => XXXXX, XXJJJ => XXXXX; XXXYY
+				return (jCount >= 1) ? HandType.FiveOfAKind : HandType.FullHouse;
+			} else {
+				//three of a kind, not full house
+				switch (jCount)
+				{
+					case 0:
+						//XXXYZ
+						return HandType.ThreeOfAKind;
+					case 1:
+						//XXXJY => XXXXY
+						return HandType.FourOfAKind;
+					case 3:
+						//JJJXY => XXXXY
+						return HandType.FourOfAKind;
+				}
+			}
 			
 		} else if (repeatsList[0].Item2 == 2)
 		{
-			return (repeatsList[1].Item2 == 2 ? HandType.TwoPair : HandType.OnePair);
+			if (repeatsList[1].Item2 == 2)
+			{
+				//two pair
+				switch (jCount)
+				{
+					case 0:
+						//XXYYZ
+						return HandType.TwoPair;
+					case 1:
+						//XXYYJ => XXXYY
+						return HandType.FullHouse;
+					case 2:
+						//JJXXY => XXXXY
+						return HandType.FourOfAKind;
+				}
+			}
+			else
+			{
+				//one pair
+				switch (jCount)
+				{
+					case 0:
+						//XXYZA
+						return HandType.OnePair;
+					case 1:
+						//XXYZJ => XXXYZ
+						return HandType.ThreeOfAKind;
+					case 2:
+						//JJXYZ => XXXYZ
+						return HandType.ThreeOfAKind;
+				}
+			}
 		}
 		else
 		{
-			return HandType.HighCard;
+			//high card			
+			//XYZAJ => XXYZA
+			return (jCount >= 1) ? HandType.OnePair : HandType.HighCard;
 		}
+		Console.WriteLine("-----could not determine hand type");
+		return HandType.HighCard;
 	}
 
 	List<Tuple<string,int>> GroupRepeatedCharacters(string theHand)
