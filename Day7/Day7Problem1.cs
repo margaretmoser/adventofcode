@@ -27,19 +27,20 @@ struct HandBidTypeRank
 
 public class Day7Problem1
 {
-	private Dictionary<string, int> hands;
 	private List<HandBidTypeRank> processedHands;
+	private List<char> cardValues;
 
 	private int totalWinnings;
 	public void Run()
 	{
 		processedHands = new List<HandBidTypeRank>();
-		hands = new Dictionary<string, int>();
-		LoadHandsAndBids();
-		
+		cardValues = new List<char>() { '2', '3', '4', '5', '6', '7', '8', '9', 'T', 'J', 'Q', 'K', 'A' };
+		LoadDataAndAssignHandType();
+		SortAllHands(processedHands);
+		CalculateTotalWinnings(processedHands);
 	}
 
-	void LoadHandsAndBids()
+	void LoadDataAndAssignHandType()
 	{
 		var path = Path.Combine(Directory.GetCurrentDirectory(), "input.txt");
 		Regex handAndBidPattern = new Regex(@"(.+)(?:\s)(\d+)",
@@ -52,11 +53,10 @@ public class Day7Problem1
 			while (file.ReadLine() is { } ln && counter < 10000)
 			{
 				GroupCollection g = handAndBidPattern.Match(ln).Groups;
-				hands.Add(g[1].Value, Int32.Parse(g[2].Value));
 				HandBidTypeRank newHand = new HandBidTypeRank(g[1].Value, Int32.Parse(g[2].Value));
 				newHand.type = GetHandType(newHand.hand);
 				processedHands.Add(newHand);
-				Console.WriteLine($"added {g[1].Value}, {g[2].Value} to dictionary; ");
+				//Console.WriteLine($"added {g[1].Value}, {g[2].Value} to dictionary; ");
 				counter++;
 			}
 			file.Close();
@@ -64,9 +64,39 @@ public class Day7Problem1
 		else { Console.WriteLine($"no file found at {path}"); }
 	}
 
-	string GetHigherHand(string hand1, string hand2)
+	void SortAllHands(List<HandBidTypeRank> theList)
 	{
-		return "";
+		theList.Sort((hand1, hand2) => CompareHands(hand1, hand2));
+	}
+
+	int CompareHands(HandBidTypeRank hand1, HandBidTypeRank hand2)
+	{
+		int compareType = hand1.type.CompareTo(hand2.type);
+		if (compareType != 0)
+			return compareType;
+		//otherwise they are the same type so start comparing cards
+		int compareChar = 0;
+		for (int i = 0; i < hand1.hand.Length; i++)
+		{
+			compareChar = cardValues.IndexOf(hand1.hand[i]) - cardValues.IndexOf(hand2.hand[i]);
+			if (compareChar != 0)
+				return compareChar;
+		}
+
+		return -999;
+
+	}
+
+	void CalculateTotalWinnings(List<HandBidTypeRank> theList)
+	{
+		int i = 1;
+		foreach (HandBidTypeRank hand in theList)
+		{
+			int scoreForThisHand = hand.bid * i;
+			totalWinnings += scoreForThisHand;
+			i++;
+		}
+		Console.WriteLine("Total winnings: "+totalWinnings.ToString());
 	}
 
 	HandType GetHandType(string hand)
@@ -74,25 +104,20 @@ public class Day7Problem1
 		List<Tuple<string, int>> repeatsList = GroupRepeatedCharacters(hand);
 		if (repeatsList[0].Item2 == 5)
 		{
-			// hand.type = HandType.FiveOfAKind;
 			return HandType.FiveOfAKind;
 		} else if (repeatsList[0].Item2 == 4)
 		{
-			//hand.type = HandType.FourOfAKind;
 			return HandType.FourOfAKind;
 		} else if (repeatsList[0].Item2 == 3)
 		{
-			//hand.type = repeatsList[1].Item2 == 2 ? HandType.FullHouse : HandType.ThreeOfAKind;
 			return (repeatsList[1].Item2 == 2 ? HandType.FullHouse : HandType.ThreeOfAKind);
 			
 		} else if (repeatsList[0].Item2 == 2)
 		{
-			//hand.type = repeatsList[1].Item2 == 2 ? HandType.TwoPair : HandType.OnePair;
 			return (repeatsList[1].Item2 == 2 ? HandType.TwoPair : HandType.OnePair);
 		}
 		else
 		{
-			//hand.type = HandType.HighCard;
 			return HandType.HighCard;
 		}
 	}
@@ -100,7 +125,7 @@ public class Day7Problem1
 	List<Tuple<string,int>> GroupRepeatedCharacters(string theHand)
 	{
 		List<Tuple<string, int>> repeatsList = new List<Tuple<string, int>>();
-		Console.WriteLine("processing hand "+theHand);
+		//Console.WriteLine("processing hand "+theHand);
 		var sortedByFrequency = theHand.GroupBy(x => x)
 			.OrderByDescending(x => x.Count())
 			.ToList();
