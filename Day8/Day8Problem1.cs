@@ -3,29 +3,33 @@ namespace Day8;
 
 public class Day8Problem1
 {
+	private string? LRInstructionsLine;
+	private List<Tuple<string, string, string>> nodes;
 	public void Run()
 	{
-		
+		nodes = new List<Tuple<string, string, string>>();
+		LoadData();
 	}
 	
-	void LoadDataAndAssignHandType()
+	void LoadData()
 	{
 		var path = Path.Combine(Directory.GetCurrentDirectory(), "input.txt");
-		Regex handAndBidPattern = new Regex(@"(.+)(?:\s)(\d+)",
+		Regex nodePattern = new Regex(@"(\w*)\W\=\W\((\w*)\,\W(\w*)\)",
 			RegexOptions.Compiled | RegexOptions.IgnoreCase);
 		
 		if (File.Exists(path))
 		{
 			using StreamReader file = new StreamReader(path);
-			int counter = 0;
-			while (file.ReadLine() is { } ln && counter < 10000)
+			LRInstructionsLine = file.ReadLine();
+			Console.WriteLine("instructions: "+LRInstructionsLine);
+			file.ReadLine();
+			while (file.ReadLine() is { } ln)
 			{
-				GroupCollection g = handAndBidPattern.Match(ln).Groups;
-				// HandBidTypeRank newHand = new HandBidTypeRank(g[1].Value, Int32.Parse(g[2].Value));
-				// newHand.type = GetHandType(newHand.hand);
-				// processedHands.Add(newHand);
-				//Console.WriteLine($"added {g[1].Value}, {g[2].Value} to dictionary; ");
-				counter++;
+				GroupCollection g = nodePattern.Match(ln).Groups;
+				Tuple<string, string, string> newNode =
+					new Tuple<string, string, string>(g[1].Value, g[2].Value, g[3].Value);
+				Console.WriteLine("processed node "+newNode.ToString());
+
 			}
 			file.Close();
 		}
