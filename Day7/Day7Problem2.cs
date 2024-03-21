@@ -1,7 +1,9 @@
 using System.Text.RegularExpressions;
 namespace Day7;
 
-public class Day7Problem1
+
+
+public class Day7Problem2
 {
 	private List<HandBidTypeRank> processedHands;
 	private List<char> cardValues;
@@ -77,6 +79,8 @@ public class Day7Problem1
 
 	HandType GetHandType(string hand)
 	{
+		//add logic here to deal with the new "Js are jokers" thing
+		
 		List<Tuple<string, int>> repeatsList = GroupRepeatedCharacters(hand);
 		if (repeatsList[0].Item2 == 5)
 		{
