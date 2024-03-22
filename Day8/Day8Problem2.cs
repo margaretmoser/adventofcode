@@ -7,36 +7,50 @@ public class Day8Problem2
 	private const string STOP_NODE = "ZZZ";
 	
 	private string? LRInstructionsLine;
-	private List<Dictionary<string,string>> nodes;
-
+	private List<Dictionary<string,string>> allNodes;
+	private List<Dictionary<string,string>> startingNodes;
+	
 	public void Run()
 	{
-		nodes = new List<Dictionary<string,string>>();
+		allNodes = new List<Dictionary<string,string>>();
+		startingNodes = new List<Dictionary<string, string>>();
 		LoadData();
 		TraverseNodes();
 	}
 
+
+	
 	void TraverseNodes()
 	{
 		int currentInstructionIndex = 0;
 		int stepsTaken = 1;
 		bool reachedTheEnd = false;
 		string currentInstruction;
-		Dictionary<string,string>? currentNode = nodes.FirstOrDefault(
-			theNode => theNode["nodeId"] == START_NODE
-		);
+
+		List<Dictionary<string, string>> nodeSet = startingNodes;
 		
 		while (!reachedTheEnd)
 		{
+		
 			currentInstruction = LRInstructionsLine[currentInstructionIndex].ToString();
+			Dictionary<string, string> currentNode;
 
-			Console.WriteLine("for node "+currentNode["nodeId"]+", get "+currentInstruction+", which is "
-			                  +currentNode[currentInstruction]);
-			currentNode = nodes.FirstOrDefault(
-				theNode => theNode["nodeId"] == currentNode[currentInstruction]);
-			if (currentNode["nodeId"] == STOP_NODE)
+			for (int i = 0; i < nodeSet.Count; i++)
 			{
-				Console.WriteLine("reached ZZZ with "+stepsTaken+" steps");
+				currentNode = nodeSet[i];
+				// Console.WriteLine("for node "+currentNode["nodeId"]+", get "+currentInstruction+", which is "
+				//                   +currentNode[currentInstruction]);
+				nodeSet[i] = allNodes.FirstOrDefault(
+					theNode => theNode["nodeId"] == currentNode[currentInstruction]);;
+			}
+			
+			// int nodesWithTerminalZs = (from n in nodeSet
+			// 	where n["nodeId"][2] == 'A'
+			// 	select n).ToList().Count();
+			
+			if (nodeSet.All(n => n["nodeId"][2] == 'Z'))
+			{
+				Console.WriteLine("all nodes have Zs with "+stepsTaken+" steps");
 				return;
 			}
 
@@ -69,7 +83,11 @@ public class Day8Problem2
 				newNode.Add("L", g[2].Value);
 				newNode.Add("R", g[3].Value);
 				//Console.WriteLine("processed node "+newNode.ToString());
-				nodes.Add(newNode);
+				allNodes.Add(newNode);
+				if (newNode["nodeId"][2] == 'A')
+				{
+					startingNodes.Add(newNode);
+				}
 			}
 			file.Close();
 		}
@@ -77,3 +95,9 @@ public class Day8Problem2
 	}
 	
 }
+
+/* just keeping this bc it might be useful sometime
+		startingNodes = (from n in nodes
+			where n["nodeId"][2] == 'A'
+			select n).ToList();
+*/
