@@ -3,17 +3,17 @@ namespace Day8;
 
 public class Day8Problem2
 {
-	private const string START_NODE = "AAA";
-	private const string STOP_NODE = "ZZZ";
-	
+
 	private string? LRInstructionsLine;
 	private List<Dictionary<string,string>> allNodes;
 	private List<Dictionary<string,string>> startingNodes;
+	private Dictionary<string, long> pathLengths;
 	
 	public void Run()
 	{
 		allNodes = new List<Dictionary<string,string>>();
 		startingNodes = new List<Dictionary<string, string>>();
+		pathLengths = new Dictionary<string, long>();
 		LoadData();
 		TraverseNodes();
 	}
@@ -22,36 +22,40 @@ public class Day8Problem2
 	
 	void TraverseNodes()
 	{
+		for (int i = 0; i < startingNodes.Count; i++)
+		{
+			//follow the path individually for each starting node and determine
+			//how many steps it will take
+			pathLengths.Add(startingNodes[i]["nodeId"], CountStepsToEndForNode(startingNodes[i]));
+		}
+
+		foreach (string nodeId in pathLengths.Keys)
+		{
+			Console.WriteLine("Node " + nodeId + " required " + pathLengths[nodeId].ToString() + " steps");
+		}
+		
+		Console.WriteLine("Total steps needed is "+CalculateLCM(pathLengths.Values.ToList()));
+		
+	}
+
+	int CountStepsToEndForNode(Dictionary<string, string> currentNode)
+	{
 		int currentInstructionIndex = 0;
 		int stepsTaken = 1;
-		bool reachedTheEnd = false;
 		string currentInstruction;
-
-		List<Dictionary<string, string>> nodeSet = startingNodes;
 		
-		while (!reachedTheEnd)
+		while (true)
 		{
-		
 			currentInstruction = LRInstructionsLine[currentInstructionIndex].ToString();
-			Dictionary<string, string> currentNode;
 
-			for (int i = 0; i < nodeSet.Count; i++)
+			Console.WriteLine("for node "+currentNode["nodeId"]+", get "+currentInstruction+", which is "
+			                  +currentNode[currentInstruction]);
+			currentNode = allNodes.FirstOrDefault(
+				theNode => theNode["nodeId"] == currentNode[currentInstruction]);
+			if (currentNode["nodeId"][2] == 'Z')
 			{
-				currentNode = nodeSet[i];
-				// Console.WriteLine("for node "+currentNode["nodeId"]+", get "+currentInstruction+", which is "
-				//                   +currentNode[currentInstruction]);
-				nodeSet[i] = allNodes.FirstOrDefault(
-					theNode => theNode["nodeId"] == currentNode[currentInstruction]);;
-			}
-			
-			// int nodesWithTerminalZs = (from n in nodeSet
-			// 	where n["nodeId"][2] == 'A'
-			// 	select n).ToList().Count();
-			
-			if (nodeSet.All(n => n["nodeId"][2] == 'Z'))
-			{
-				Console.WriteLine("all nodes have Zs with "+stepsTaken+" steps");
-				return;
+				Console.WriteLine("reached end with "+stepsTaken+" steps");
+				return stepsTaken;
 			}
 
 			stepsTaken++;
@@ -61,6 +65,22 @@ public class Day8Problem2
 				currentInstructionIndex = 0;
 			}
 		}
+		return -1;
+	}
+
+	long CalculateLCM(List<long> numbers)
+	{
+		//thanks to https://stackoverflow.com/questions/147515/least-common-multiple-for-3-or-more-numbers/29717490#29717490
+		return numbers.Aggregate(lcm);
+	}
+	
+	static long lcm(long a, long b)
+	{
+		return Math.Abs(a * b) / GCD(a, b);
+	}
+	static long GCD(long a, long b)
+	{
+		return b == 0 ? a : GCD(b, a % b);
 	}
 	
 	void LoadData()
