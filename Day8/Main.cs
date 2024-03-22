@@ -6,7 +6,7 @@ class Day8Main
 	{
 		Day8Problem1 problem1 = new Day8Problem1();
 		problem1.Run();
-		// Day7Problem2 problem2 = new Day7Problem2();
+		// Day8Problem2 problem2 = new Day8Problem2();
 		// problem2.Run();
 	}
 			
