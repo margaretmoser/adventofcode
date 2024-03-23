@@ -3,9 +3,11 @@ namespace Day9;
 
 public class Day9Problem1
 {
+	private List<List<long>> allDataSeries;
 	
 	public void Run()
 	{
+		allDataSeries = new List<List<long>>();
 		LoadData();
 	}
 
@@ -13,17 +15,23 @@ public class Day9Problem1
 	void LoadData()
 	{
 		var path = Path.Combine(Directory.GetCurrentDirectory(), "input.txt");
-		Regex nodePattern = new Regex(@"(\w*)\W\=\W\((\w*)\,\W(\w*)\)",
+		Regex dataSeriesPattern = new Regex(@"(-?\d*)",
 			RegexOptions.Compiled | RegexOptions.IgnoreCase);
 		
 		if (File.Exists(path))
 		{
 			using StreamReader file = new StreamReader(path);
-			file.ReadLine();
 			while (file.ReadLine() is { } ln)
 			{
-				GroupCollection g = nodePattern.Match(ln).Groups;
-				//Console.WriteLine("processed node "+newNode.ToString());
+				List<long> thisDataSeries = new List<long>();
+				string[] numbersAsStrings = ln.Split(" ");
+				foreach (string s in numbersAsStrings)
+				{
+					Console.Write(s+", ");
+					thisDataSeries.Add(Int32.Parse(s));
+				}
+				Console.WriteLine();
+				allDataSeries.Add(thisDataSeries);
 			}
 			file.Close();
 		}
