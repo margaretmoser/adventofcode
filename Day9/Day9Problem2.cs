@@ -50,16 +50,16 @@ public class Day9Problem2
 			index++;
 		}
 		derivedLists.Reverse();
-		derivedLists[0].Add(0);
-		long sumOfLasts = 0;
-		for (int i = 0; i < derivedLists.Count; i++)
+		derivedLists[0].Insert(0,0);
+		long extrapolatedValue = 0;
+		for (int i = 1; i < derivedLists.Count; i++)
 		{
-			// derivedLists[i].ForEach( x => Console.Write(x+" "));
-			// Console.WriteLine();
-			sumOfLasts += derivedLists[i].Last();
+			thisList = derivedLists[i]; 
+			thisList.Insert(0, thisList[0] - derivedLists[i - 1][0]);
+			extrapolatedValue = thisList.First();
 		}
 		
-		return sumOfLasts;
+		return extrapolatedValue;
 	}
 
 

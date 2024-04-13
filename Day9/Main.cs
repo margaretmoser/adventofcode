@@ -9,6 +9,9 @@
  *        0   0   0   _0
  *  where the _s are extrapolated and 28 is the final value.
  *
+ * For 9.2, extrapolate the "first" value, working backwards from the same
+ * calculated pattern.
+ *
  * Learned about: some LINQ stuff though I didn't end up using much.
  *
  * Combining/calculating elements based on previous elements in collection:
@@ -16,6 +19,7 @@
  *
  * The fact that there is no version of ForEach in C# that provides the index as I am used
  * to from using libraries like UnderscoreJS.
+ * 
  */
 
 namespace Day9;
