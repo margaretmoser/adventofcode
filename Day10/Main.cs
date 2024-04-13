@@ -12,6 +12,11 @@
  */
 
 namespace Day10;
+
+public enum Direction
+{
+	Up, Right, Down, Left
+}
 class Day10Main
 {
 	static void Main()
@@ -21,6 +26,8 @@ class Day10Main
 		// Day10Problem2 problem2 = new Day10Problem2();
 		// problem2.Run();
 	}
+
+
 
 	public struct Coords
 	{

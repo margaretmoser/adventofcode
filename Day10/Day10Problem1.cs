@@ -14,38 +14,149 @@ public class Day10Problem1
 	}
 
 
+	//Naive and extremely verbose solution, but it works
 	void TraverseMap()
 	{
+		char currentChar;
+		bool cycleFound = false;
+		bool endFound = false;
+		int pathLength = 0;
 		currentPosition = startPosition;
-		char upChar, rightChar, downChar, leftChar;
-		// come back and generalize this; for the moment just start by looking right
-		// string[] directions = { "up", "right", "down", "left" };
-		// int currentDirectionFromStart = 0;
-		//
-		// for (int i = 0; i < directions.Length; i++)
-		// {
-		// 	
-		// }
+		//forcing right for initial test; come back and iterate over up, down, left
+		Direction currentDirection = Direction.Up;
+		currentPosition.Y--;
 		
-			upChar = rawMap[currentPosition.X, currentPosition.Y - 1];
-			rightChar = rawMap[currentPosition.X + 1, currentPosition.Y];
-			downChar = rawMap[currentPosition.X, currentPosition.Y + 1];
-			leftChar = rawMap[currentPosition.X - 1, currentPosition.Y];
-
-			if (upChar == '|') //move up
+		Console.WriteLine("current position is "+currentPosition);
+		while (!cycleFound)
+		{
+			currentChar = rawMap[currentPosition.X, currentPosition.Y];
+			Console.Write(currentChar);
+			pathLength++;
+			if (currentChar == 'S')
 			{
-				currentPosition.Y -= 1;
+				Console.WriteLine("back to the beginning; cycle length is "+pathLength+
+				                  " and most distant point is "+pathLength/2+" steps away");
+				cycleFound = true;
+				break;
+			} else if (currentChar == '.')
+			{
+				Console.WriteLine("pipe end found, should exit loop and start again from S");
+				endFound = true;
 			}
-			else if (upChar == 'F') //move up and right
-			{	
-				currentPosition.Y -= 1; currentPosition.X += 1;
+			else
+			{
+				if (currentDirection == Direction.Up)
+				{
+					switch (currentChar)
+					{
+						case '|': //move up
+							currentPosition.Y -= 1;
+							currentDirection = Direction.Up;
+							break;
+						case 'F': //move right
+							currentPosition.X += 1;
+							currentDirection = Direction.Right;
+							break;
+						case '7': //move left
+							currentPosition.X -= 1;
+							currentDirection = Direction.Left;
+							break;
+						default:
+							Console.WriteLine("pipe end found, should exit loop and start again from S");
+							endFound = true;
+							break;
+					}
+				}
+				else if (currentDirection == Direction.Right)
+				{
+					switch (currentChar)
+					{
+						case '-': //move right
+							currentPosition.X += 1;
+							currentDirection = Direction.Right;
+							break;
+						case '7': //move down
+							currentPosition.Y += 1;
+							currentDirection = Direction.Down;
+							break;
+						case 'J': //move up
+							currentPosition.Y -= 1;
+							currentDirection = Direction.Up;
+							break;
+						default:
+							Console.WriteLine("pipe end found, should exit loop and start again from S");
+							endFound = true;
+							break;
+					}
+				}
+				else if (currentDirection == Direction.Down)
+				{
+					switch (currentChar)
+					{
+						case '|': //move down
+							currentPosition.Y += 1;
+							currentDirection = Direction.Down;
+							break;
+						case 'L': //move right
+							currentPosition.X += 1;
+							currentDirection = Direction.Right;
+							break;
+						case 'J': //move left
+							currentPosition.X -= 1;
+							currentDirection = Direction.Left;
+							break;
+						default:
+							Console.WriteLine("pipe end found, should exit loop and start again from S");
+							endFound = true;
+							break;
+					}
+				}
+				else if (currentDirection == Direction.Left)
+				{
+					switch (currentChar)
+					{
+						case '-': //move left
+							currentPosition.X -= 1;
+							currentDirection = Direction.Left;
+							break;
+						case 'F': //move down
+							currentPosition.Y += 1;
+							currentDirection = Direction.Down;
+							break;
+						case 'L': //move up
+							currentPosition.Y -= 1;
+							currentDirection = Direction.Up;
+							break;
+						default:
+							Console.WriteLine("pipe end found, should exit loop and start again from S");
+							endFound = true;
+							break;
+					}
+				}
 			}
 
-			
-			if ('Y' == 'S')
+			if (endFound)
 			{
-				Console.WriteLine("back to the beginning");
-				//cycleFound = true;
+				currentPosition = startPosition;
+				switch (currentDirection)
+				{
+					case Direction.Up:
+						currentDirection = Direction.Right;
+						currentPosition.X++;
+						break;
+					case Direction.Right:
+						currentDirection = Direction.Down;
+						currentPosition.Y++;
+						break;
+					case Direction.Down:
+						currentDirection = Direction.Left;
+						currentPosition.X--;
+						break;
+					case Direction.Left:
+						Console.WriteLine("error, have already checked all directions");
+						break;
+				}
+				endFound = false;
 			}
 		}
 	}
@@ -53,7 +164,7 @@ public class Day10Problem1
 	
 	void LoadData()
 	{
-		var path = Path.Combine(Directory.GetCurrentDirectory(), "input_test.txt");
+		var path = Path.Combine(Directory.GetCurrentDirectory(), "input.txt");
 		
 		if (File.Exists(path))
 		{
@@ -67,10 +178,10 @@ public class Day10Problem1
 				int j = 0;
 				foreach (char c in inputLine)
 				{
-					rawMap[i,j] = c;
+					rawMap[j,i] = c;
 					if (c == 'S')
 					{
-						startPosition = new Day10Main.Coords(i, j);
+						startPosition = new Day10Main.Coords(j, i);
 					}
 					j++;
 				}
