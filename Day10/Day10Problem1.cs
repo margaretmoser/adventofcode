@@ -45,7 +45,7 @@ public class Day10Problem1
 			if ('Y' == 'S')
 			{
 				Console.WriteLine("back to the beginning");
-				cycleFound = true;
+				//cycleFound = true;
 			}
 		}
 	}
