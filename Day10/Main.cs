@@ -16,14 +16,22 @@
  * -JOL		<- hole that is outside the loop (O)					L7IF		<- hole that is inside the loop (I)
  * OOF-																									O|FJ
  * 
- * The next theory to try out is counting odd/even numbers of tiles that are between a given tile and
- * an edge of the map. Drawing this out has proven difficult.
+ * I attempted a solution based on flood fill from the outside, but this didn't account for internal
+ * holes. Then I searched a lot and eventually discovered that this problem is the same thing as
+ * drawing a lasso around pixels in Photoshop/other raster graphics software. Found an approach to that,
+ * with pictures, credited below. Then just tweaks.
  * 
  * 
  * 
  * Learned about:
  *      (reminder: comma and plus do different things in Console Write/WriteLine)
  *			https://stackoverflow.com/questions/49334797/what-is-the-difference-between-comma-and-plus-in-string-arrays
+ *			traverse a [,] style 2d array
+ *			https://stackoverflow.com/questions/8184306/iterate-through-2-dimensional-array-c-sharp
+ *			pass an enum variable (or anything else) by reference
+ *			https://bytes.com/topic/c-sharp/answers/253344-passing-enumeration-variable-ref
+ *			the actual solution, based on a raster/pixel/lasso-type problem
+ *			https://gamedev.stackexchange.com/questions/141460/how-can-i-fill-the-interior-of-a-closed-loop-on-a-tile-map
  */
 
 namespace Day10;
@@ -36,10 +44,10 @@ class Day10Main
 {
 	static void Main()
 	{
-		Day10Problem1 problem1 = new Day10Problem1();
-		problem1.Run();
-		// Day10Problem2 problem2 = new Day10Problem2();
-		// problem2.Run();
+		// Day10Problem1 problem1 = new Day10Problem1();
+		// problem1.Run();
+		Day10Problem2 problem2 = new Day10Problem2();
+		problem2.Run();
 	}
 
 

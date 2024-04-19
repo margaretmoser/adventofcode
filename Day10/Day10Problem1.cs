@@ -22,7 +22,6 @@ public class Day10Problem1
 		bool endFound = false;
 		int pathLength = 0;
 		currentPosition = startPosition;
-		//forcing right for initial test; come back and iterate over up, down, left
 		Direction currentDirection = Direction.Up;
 		currentPosition.Y--;
 		

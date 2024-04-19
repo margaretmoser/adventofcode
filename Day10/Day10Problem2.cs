@@ -1,49 +1,163 @@
 namespace Day10;
 public class Day10Problem2
 
-/* just a copy of Problem1 for the moment */
-
 {
 	private char[,] rawMap;
 	private Day10Main.Coords startPosition;
 	private Day10Main.Coords currentPosition;
-	
-	LinkedList<char> linkedMap = new LinkedList<char>();
+
+	private List<Day10Main.Coords> tilesInPath;
 	
 	public void Run()
 	{
 		LoadData();
 		TraverseMap();
+		MarkNonPathTiles();
+		AttemptLassoAlgo();
 	}
 
+	void MarkEdges(char[,] tileMap, char emptyChar, char borderChar)
+	{
+		bool isSectionOfPipe = false;
+		
+		for (int lineNo = 0; lineNo < tileMap.GetLength(1); lineNo++)
+		{
+			for (int charNo = 0; charNo < tileMap.GetLength(0) - 1; charNo++)
+			{
+				char currentChar = tileMap[charNo, lineNo];
+				char nextChar = tileMap[charNo + 1, lineNo];
+				
+				if (isSectionOfPipe)
+				{
+					if (nextChar == emptyChar)
+					{
+						tileMap[charNo, lineNo] = borderChar;
+						isSectionOfPipe = false;
+					}
+				}
+				else
+				{
+					if (currentChar == emptyChar && nextChar != emptyChar)
+					{
+						tileMap[charNo+1, lineNo] = borderChar;
+						isSectionOfPipe = true;
+					}
+				}
 
+				Console.Write(tileMap[charNo,lineNo]);
+				if (charNo + 1 == tileMap.GetLength(0) - 1)
+				{
+					Console.Write(tileMap[charNo+1,lineNo]);
+				}
+			}
+
+			isSectionOfPipe = false;
+			Console.WriteLine();
+		}
+	}
+	
+	
+	//FIXME: this works for the first test input, but fails on the second
+	//It looks like it is not correctly marking tiles around the edges of the
+	//map that are also "edges" (borders) of pipe sections
+	void AttemptLassoAlgo()
+	{
+		char emptyChar = '.';
+		char borderChar = 'x';
+		char outsideMarkerChar = 'O';
+		char insideMarkerChar = 'I';
+
+		Console.WriteLine("Marking edges");
+		MarkEdges(rawMap, emptyChar, borderChar);
+		Console.WriteLine();
+
+		int edgesEncounteredThisLine = 0;
+		char currentChar;
+		
+		//looping over the array for the billionth time
+		Console.WriteLine("Marking inside tiles");
+		for (int lineNo = 0; lineNo < rawMap.GetLength(1); lineNo++)
+		{
+			for (int charNo = 0; charNo < rawMap.GetLength(0) - 1; charNo++)
+			{
+				currentChar = rawMap[charNo, lineNo];
+				if (currentChar == borderChar)
+				{
+					edgesEncounteredThisLine++;
+				}
+				if (currentChar == emptyChar)
+				{
+					if (edgesEncounteredThisLine % 2 == 1)
+					{
+						rawMap[charNo, lineNo] = insideMarkerChar;
+					}
+					else
+					{
+						rawMap[charNo, lineNo] = outsideMarkerChar;
+					}
+				}
+				Console.Write(rawMap[charNo,lineNo]);
+				if (charNo + 1 == rawMap.GetLength(0) - 1)
+				{
+					Console.Write(rawMap[charNo+1,lineNo]);
+				}
+			}
+
+			edgesEncounteredThisLine = 0;
+			Console.WriteLine();
+		}
+
+	}
+
+	void MarkNonPathTiles()
+	{
+		Console.WriteLine("processing non-path tiles. Updated map:");
+		for (int lineNo = 0; lineNo < rawMap.GetLength(1); lineNo++)
+		{
+			for (int charNo = 0; charNo < rawMap.GetLength(0); charNo++)
+			{
+				Day10Main.Coords tile = new Day10Main.Coords(charNo, lineNo);
+				if (!tilesInPath.Contains(tile))
+				{
+					rawMap[charNo, lineNo] = '.';
+				}
+				Console.Write(rawMap[charNo,lineNo]);
+			}
+			Console.WriteLine();
+		}
+		Console.WriteLine();
+		
+	}
+
+	
 	//Naive and extremely verbose solution, but it works
 	void TraverseMap()
 	{
 		char currentChar;
 		bool cycleFound = false;
 		bool endFound = false;
-		int pathLength = 0;
-		currentPosition = startPosition;
-		//forcing right for initial test; come back and iterate over up, down, left
 		Direction currentDirection = Direction.Up;
-		currentPosition.Y--;
+
+		currentPosition = startPosition;
 		
-		Console.WriteLine("current position is "+currentPosition);
+		SetStartDirectionAndTile(rawMap, ref currentDirection, ref currentPosition);
+		
+		tilesInPath = new List<Day10Main.Coords>();
+		
 		while (!cycleFound)
 		{
 			currentChar = rawMap[currentPosition.X, currentPosition.Y];
-			Console.Write(currentChar);
-			pathLength++;
+			tilesInPath.Add(currentPosition);
 			if (currentChar == 'S')
 			{
-				Console.WriteLine("back to the beginning; cycle length is "+pathLength+
-				                  " and most distant point is "+pathLength/2+" steps away");
+				Console.WriteLine("back to the beginning!");
+				Console.WriteLine();
+				Console.WriteLine();
 				cycleFound = true;
 				break;
 			} else if (currentChar == '.')
 			{
-				Console.WriteLine("pipe end found, should exit loop and start again from S");
+				Console.WriteLine("pipe end found");
 				endFound = true;
 			}
 			else
@@ -65,7 +179,7 @@ public class Day10Problem2
 							currentDirection = Direction.Left;
 							break;
 						default:
-							Console.WriteLine("pipe end found, should exit loop and start again from S");
+							Console.WriteLine("pipe end found");
 							endFound = true;
 							break;
 					}
@@ -87,7 +201,7 @@ public class Day10Problem2
 							currentDirection = Direction.Up;
 							break;
 						default:
-							Console.WriteLine("pipe end found, should exit loop and start again from S");
+							Console.WriteLine("pipe end found");
 							endFound = true;
 							break;
 					}
@@ -109,7 +223,7 @@ public class Day10Problem2
 							currentDirection = Direction.Left;
 							break;
 						default:
-							Console.WriteLine("pipe end found, should exit loop and start again from S");
+							Console.WriteLine("pipe end found");
 							endFound = true;
 							break;
 					}
@@ -131,7 +245,7 @@ public class Day10Problem2
 							currentDirection = Direction.Up;
 							break;
 						default:
-							Console.WriteLine("pipe end found, should exit loop and start again from S");
+							Console.WriteLine("pipe end found");
 							endFound = true;
 							break;
 					}
@@ -141,6 +255,7 @@ public class Day10Problem2
 			if (endFound)
 			{
 				currentPosition = startPosition;
+				tilesInPath = new List<Day10Main.Coords>();
 				switch (currentDirection)
 				{
 					case Direction.Up:
@@ -164,31 +279,54 @@ public class Day10Problem2
 		}
 	}
 	
+	void SetStartDirectionAndTile(char[,] tiles, ref Direction startDirection, ref Day10Main.Coords firstPos)
+	{
+		if (firstPos.Y > 0)
+		{
+			firstPos.Y--;
+			startDirection = Direction.Up;
+		} else if (firstPos.X < tiles.GetLength(0) - 1)
+		{
+			firstPos.X++;
+			startDirection = Direction.Right;
+		} else if (firstPos.Y < tiles.GetLength(1) - 1)
+		{
+			firstPos.Y++;
+			startDirection = Direction.Down;
+		}
+		else
+		{
+			firstPos.X--;
+			startDirection = Direction.Left;
+		}
+	}
 	
 	void LoadData()
 	{
-		var path = Path.Combine(Directory.GetCurrentDirectory(), "input.txt");
+		var path = Path.Combine(Directory.GetCurrentDirectory(), "input_test.txt");
 		
 		if (File.Exists(path))
 		{
 			
 			string[] textAsLines = File.ReadAllLines(path);
 			int lineLength = textAsLines[0].Length;
-			rawMap = new char[textAsLines.Length, lineLength];
-			int i = 0;
+			rawMap = new char[lineLength,textAsLines.Length];
+			int lineNo = 0;
 			foreach (string inputLine in textAsLines)
 			{
-				int j = 0;
+				int charNo = 0;
 				foreach (char c in inputLine)
 				{
-					rawMap[j,i] = c;
+					Console.Write(c);
+					rawMap[charNo,lineNo] = c;
 					if (c == 'S')
 					{
-						startPosition = new Day10Main.Coords(j, i);
+						startPosition = new Day10Main.Coords(charNo,lineNo);
 					}
-					j++;
+					charNo++;
 				}
-				i++;
+				lineNo++;
+				Console.WriteLine();
 			}
 			Console.WriteLine("start position is "+startPosition.ToString());
 		}
