@@ -1,4 +1,6 @@
 namespace Day10;
+using System.Text.RegularExpressions;
+
 public class Day10Problem2
 
 {
@@ -33,15 +35,29 @@ public class Day10Problem2
 					{
 						tileMap[charNo, lineNo] = borderChar;
 						isSectionOfPipe = false;
+					} else if (charNo == tileMap.GetLength(0) -2)
+					{
+						//Console.Write("last char? charNo is "+charNo+" and next character is "+nextChar);
+						if (nextChar != emptyChar)
+						{
+							tileMap[charNo + 1, lineNo] = borderChar;
+						}
 					}
 				}
 				else
 				{
-					if (currentChar == emptyChar && nextChar != emptyChar)
+					if (charNo == 0 && currentChar != emptyChar)
+					{
+						tileMap[charNo, lineNo] = borderChar;
+						isSectionOfPipe = true;
+					}
+					if ((currentChar == emptyChar && nextChar != emptyChar))
 					{
 						tileMap[charNo+1, lineNo] = borderChar;
 						isSectionOfPipe = true;
 					}
+					//Console.Write("line "+lineNo+", char "+charNo);
+					
 				}
 
 				Console.Write(tileMap[charNo,lineNo]);
@@ -58,8 +74,6 @@ public class Day10Problem2
 	
 	
 	//FIXME: this works for the first test input, but fails on the second
-	//It looks like it is not correctly marking tiles around the edges of the
-	//map that are also "edges" (borders) of pipe sections
 	void AttemptLassoAlgo()
 	{
 		char emptyChar = '.';
@@ -71,41 +85,15 @@ public class Day10Problem2
 		MarkEdges(rawMap, emptyChar, borderChar);
 		Console.WriteLine();
 
-		int edgesEncounteredThisLine = 0;
-		char currentChar;
-		
 		//looping over the array for the billionth time
 		Console.WriteLine("Marking inside tiles");
 		for (int lineNo = 0; lineNo < rawMap.GetLength(1); lineNo++)
 		{
-			for (int charNo = 0; charNo < rawMap.GetLength(0) - 1; charNo++)
-			{
-				currentChar = rawMap[charNo, lineNo];
-				if (currentChar == borderChar)
-				{
-					edgesEncounteredThisLine++;
-				}
-				if (currentChar == emptyChar)
-				{
-					if (edgesEncounteredThisLine % 2 == 1)
-					{
-						rawMap[charNo, lineNo] = insideMarkerChar;
-					}
-					else
-					{
-						rawMap[charNo, lineNo] = outsideMarkerChar;
-					}
-				}
-				Console.Write(rawMap[charNo,lineNo]);
-				if (charNo + 1 == rawMap.GetLength(0) - 1)
-				{
-					Console.Write(rawMap[charNo+1,lineNo]);
-				}
-			}
-
-			edgesEncounteredThisLine = 0;
+			Regex interiorTilePattern = new Regex(@"(.+)(?:\s)(\d+)",
+				RegexOptions.Compiled | RegexOptions.IgnoreCase);
 			Console.WriteLine();
 		}
+
 
 	}
 
