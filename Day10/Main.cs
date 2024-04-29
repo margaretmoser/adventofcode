@@ -40,6 +40,7 @@ public enum Direction
 {
 	Up, Right, Down, Left
 }
+
 class Day10Main
 {
 	static void Main()
