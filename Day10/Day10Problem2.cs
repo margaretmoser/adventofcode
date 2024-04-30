@@ -21,13 +21,11 @@ public class Day10Problem2
 	private readonly char[,] _pipeBlock = {{'.','|','.'},{'.','|','.'},{'.','|','.'}};
 	private readonly char[,] _dashBlock = {{'.','.','.'},{'-','-','-'},{'.','.','.'}};
 
-	
 	public void Run()
 	{
 		LoadData();
 		FindPath();
 		MarkNonPathTiles();
-		
 		PadCells();
 		FloodFillExterior();
 		CountEmptyInteriorCells();
@@ -47,7 +45,6 @@ public class Day10Problem2
 		{
 			while (!cycleFound)
 			{
-
 				var currentChar = _tileMap[currentPosition.X, currentPosition.Y];
 				Tuple<Direction, char> mapCursor = new Tuple<Direction, char>(currentDirection, currentChar);
 				_tilesInPath.Add(currentPosition);
@@ -186,13 +183,12 @@ public class Day10Problem2
 	
 	void PadCells()
 	{
-		_paddedMap = new char[_originalMapWidth * 3, _originalMapHeight * 3];
-
-		for (int originalLineNo = 0; originalLineNo < _originalMapHeight; originalLineNo++)
+		if (_tileMap != null)
 		{
-			for (int originalCharNo = 0; originalCharNo < _originalMapWidth; originalCharNo++)
+			_paddedMap = new char[_originalMapWidth * 3, _originalMapHeight * 3];
+			for (int originalLineNo = 0; originalLineNo < _originalMapHeight; originalLineNo++)
 			{
-				if (_tileMap != null)
+				for (int originalCharNo = 0; originalCharNo < _originalMapWidth; originalCharNo++)
 				{
 					char[,] paddedBlock = ToPaddedBlock(_tileMap[originalCharNo, originalLineNo]);
 					PlacePaddedBlock(_paddedMap, paddedBlock, originalCharNo * 3, originalLineNo * 3);
