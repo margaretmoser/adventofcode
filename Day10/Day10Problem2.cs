@@ -5,6 +5,7 @@ public class Day10Problem2
 
 {
 	private char[,] tileMap;
+	private char[,] paddedMap;
 	private Day10Main.Coords startPosition;
 
 	private List<Day10Main.Coords> tilesInPath;
@@ -16,15 +17,16 @@ public class Day10Problem2
 		TraverseMap();
 		MarkNonPathTiles();
 		
-		PadCells(tileMap);
+		PadCells();
+		AttemptFloodFill();
 		//AttemptLassoAlgo();
 	}
 
-	void PadCells(char[,] tileMap)
+	void PadCells()
 	{
 		int rawMapWidth = tileMap.GetLength(0);
 		int rawMapHeight = tileMap.GetLength(1);
-		char[,] paddedMap = new char[rawMapWidth * 3, rawMapHeight * 3];
+		paddedMap = new char[rawMapWidth * 3, rawMapHeight * 3];
 		
 		char[,] emptyBlock = {{'.','.','.'},{'.','.','.'},{'.','.','.'}};
 		char[,] fBlock = {{'.','.','.'},{'.','F','-'},{'.','|','.'}};
@@ -62,14 +64,8 @@ public class Day10Problem2
 		}
 
 		Console.WriteLine("\n"+"Padded map:");
-		for (int lineNo = 0; lineNo < paddedMap.GetLength(1); lineNo++)
-		{
-			for (int charNo = 0; charNo < paddedMap.GetLength(0) - 1; charNo++)
-			{
-				Console.Write(paddedMap[charNo,lineNo]);
-			}
-			Console.WriteLine();
-		}
+		PrintMap(paddedMap);
+		
 		Console.WriteLine();Console.WriteLine();
 
 	}
@@ -86,6 +82,29 @@ public class Day10Problem2
 		}
 	}
 
+	
+
+	void PrintMap(char[,] theMap)
+	{
+		for (int lineNo = 0; lineNo < theMap.GetLength(1); lineNo++)
+		{
+			for (int charNo = 0; charNo < theMap.GetLength(0) - 1; charNo++)
+			{
+				Console.Write(theMap[charNo,lineNo]);
+			}
+			Console.WriteLine();
+		}
+	}
+
+	void AttemptFloodFill()
+	{
+		GFGFloodFill.FloodFill(paddedMap,
+			paddedMap.GetLength(0), paddedMap.GetLength(1),
+			0, 0, '.', '+');
+		Console.WriteLine("Map after flood fill:");
+		PrintMap(paddedMap);
+	}
+	
 	void MarkEdges(char[,] tileMap, char borderChar)
 	{
 		bool isSectionOfPipe = false;
@@ -140,7 +159,6 @@ public class Day10Problem2
 		}
 	}
 	
-	
 	//FIXME: this works for the first test input, but fails on the second
 	void AttemptLassoAlgo()
 	{
@@ -150,12 +168,12 @@ public class Day10Problem2
 		char insideMarkerChar = 'I';
 
 		Console.WriteLine("Marking edges");
-		MarkEdges(tileMap, borderChar);
+		MarkEdges(paddedMap, borderChar);
 		Console.WriteLine();
 
 		//looping over the array for the billionth time
 		Console.WriteLine("Marking inside tiles");
-		for (int lineNo = 0; lineNo < tileMap.GetLength(1); lineNo++)
+		for (int lineNo = 0; lineNo < paddedMap.GetLength(1); lineNo++)
 		{
 			Regex interiorTilePattern = new Regex(@"(.+)(?:\s)(\d+)",
 				RegexOptions.Compiled | RegexOptions.IgnoreCase);
@@ -317,15 +335,15 @@ public class Day10Problem2
 				switch (currentDirection)
 				{
 					case Direction.Up:
-						currentDirection = Direction.Right;
+						startDirection = currentDirection = Direction.Right;
 						currentPosition.X++;
 						break;
 					case Direction.Right:
-						currentDirection = Direction.Down;
+						startDirection = currentDirection = Direction.Down;
 						currentPosition.Y++;
 						break;
 					case Direction.Down:
-						currentDirection = Direction.Left;
+						startDirection = currentDirection = Direction.Left;
 						currentPosition.X--;
 						break;
 					case Direction.Left:

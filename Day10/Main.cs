@@ -30,7 +30,7 @@
  *			https://stackoverflow.com/questions/8184306/iterate-through-2-dimensional-array-c-sharp
  *			pass an enum variable (or anything else) by reference
  *			https://bytes.com/topic/c-sharp/answers/253344-passing-enumeration-variable-ref
- *			the actual solution, based on a raster/pixel/lasso-type problem
+ *			raster/pixel/lasso-type approach with scanlines
  *			https://gamedev.stackexchange.com/questions/141460/how-can-i-fill-the-interior-of-a-closed-loop-on-a-tile-map
  */
 
