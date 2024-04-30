@@ -1,15 +1,27 @@
 namespace Day10;
-using System.Text.RegularExpressions;
 
 public class Day10Problem2
 
 {
-	private char[,] tileMap;
-	private char[,] paddedMap;
-	private Day10Main.Coords startPosition;
+	private char[,]? _tileMap;
+	private int _originalMapWidth;
+	private int _originalMapHeight;
+	private char[,]? _paddedMap;
+	private Day10Main.Coords _startPosition;
 
-	private List<Day10Main.Coords> tilesInPath;
-	private char emptyChar = '.';
+	private List<Day10Main.Coords> _tilesInPath = new List<Day10Main.Coords>();
+	private const char EmptyChar = '.';
+	private const char EmptyOutsideChar = '+';
+
+	private readonly char[,] _emptyBlock = {{'.','.','.'},{'.','.','.'},{'.','.','.'}};
+	private readonly char[,] _fBlock = {{'.','.','.'},{'.','F','-'},{'.','|','.'}};
+	private readonly char[,] _jBlock = {{'.','|','.'},{'-','J','.'},{'.','.','.'}};
+	private readonly char[,] _ellBlock = {{'.','|','.'},{'.','L','-'},{'.','.','.'}};
+	private readonly char[,] _sevenBlock = {{'.','.','.'},{'-','7','.'},{'.','|','.'}};
+	private readonly char[,] _pipeBlock = {{'.','|','.'},{'.','|','.'},{'.','|','.'}};
+	private readonly char[,] _dashBlock = {{'.','.','.'},{'-','-','-'},{'.','.','.'}};
+
+	private IEnumerable<char>? _emptyBlockSeq;
 	
 	public void Run()
 	{
@@ -18,56 +30,40 @@ public class Day10Problem2
 		MarkNonPathTiles();
 		
 		PadCells();
-		AttemptFloodFill();
-		//AttemptLassoAlgo();
+		FloodFillExterior();
+		CountEmptyInteriorCells();
 	}
+
 
 	void PadCells()
 	{
-		int rawMapWidth = tileMap.GetLength(0);
-		int rawMapHeight = tileMap.GetLength(1);
-		paddedMap = new char[rawMapWidth * 3, rawMapHeight * 3];
-		
-		char[,] emptyBlock = {{'.','.','.'},{'.','.','.'},{'.','.','.'}};
-		char[,] fBlock = {{'.','.','.'},{'.','F','-'},{'.','|','.'}};
-		char[,] jBlock = {{'.','|','.'},{'-','J','.'},{'.','.','.'}};
-		char[,] ellBlock = {{'.','|','.'},{'.','L','-'},{'.','.','.'}};
-		char[,] sevenBlock = {{'.','.','.'},{'-','7','.'},{'.','|','.'}};
-		char[,] pipeBlock = {{'.','|','.'},{'.','|','.'},{'.','|','.'}};
-		char[,] dashBlock = {{'.','.','.'},{'-','-','-'},{'.','.','.'}};
-		
-		
-		char[,] paddedBlock;
-		for (int originalLineNo = 0; originalLineNo < rawMapHeight; originalLineNo++)
+		_paddedMap = new char[_originalMapWidth * 3, _originalMapHeight * 3];
+
+		for (int originalLineNo = 0; originalLineNo < _originalMapHeight; originalLineNo++)
 		{
-			for (int originalCharNo = 0; originalCharNo < rawMapWidth; originalCharNo++)
+			for (int originalCharNo = 0; originalCharNo < _originalMapWidth; originalCharNo++)
 			{
-				switch (tileMap[originalCharNo,originalLineNo])
+				char[,] paddedBlock;
+				switch (_tileMap[originalCharNo,originalLineNo])
 				{
-					case 'F': paddedBlock = fBlock;
+					case 'F': paddedBlock = _fBlock;
 						break;
-					case 'J': paddedBlock = jBlock;
+					case 'J': paddedBlock = _jBlock;
 						break;
-					case 'L': paddedBlock = ellBlock;
+					case 'L': paddedBlock = _ellBlock;
 						break;
-					case '7': paddedBlock = sevenBlock;
+					case '7': paddedBlock = _sevenBlock;
 						break;
-					case '|': paddedBlock = pipeBlock;
+					case '|': paddedBlock = _pipeBlock;
 						break;
-					case '-': paddedBlock = dashBlock;
+					case '-': paddedBlock = _dashBlock;
 						break;
-					default: paddedBlock = emptyBlock;
+					default: paddedBlock = _emptyBlock;
 						break;
 				}
-				PlacePaddedBlock(paddedMap, paddedBlock, originalCharNo*3, originalLineNo*3);
+				PlacePaddedBlock(_paddedMap, paddedBlock, originalCharNo*3, originalLineNo*3);
 			}
 		}
-
-		Console.WriteLine("\n"+"Padded map:");
-		PrintMap(paddedMap);
-		
-		Console.WriteLine();Console.WriteLine();
-
 	}
 
 	void PlacePaddedBlock(char[,] paddedMap, char[,] paddedBlock, int charNo, int lineNo)
@@ -76,131 +72,70 @@ public class Day10Problem2
 		{
 			for (int j = 0; j < 3; j++)
 			{
-				//reversed x/y because it's too hard to reverse the padded block defs
+				//reversed x/y in map vs block, because I don't feel like reversing
+				//the padded block definitions
 				paddedMap[charNo + j, lineNo + i] = paddedBlock[i, j];
 			}
 		}
 	}
 
-	
 
-	void PrintMap(char[,] theMap)
+	void CountEmptyInteriorCells()
 	{
-		for (int lineNo = 0; lineNo < theMap.GetLength(1); lineNo++)
-		{
-			for (int charNo = 0; charNo < theMap.GetLength(0) - 1; charNo++)
-			{
-				Console.Write(theMap[charNo,lineNo]);
-			}
-			Console.WriteLine();
-		}
-	}
+		//process 3x3 padded blocks and find those that are just .s. Each corresponds to
+		//an empty interior tile in the original map.
 
-	void AttemptFloodFill()
-	{
-		GFGFloodFill.FloodFill(paddedMap,
-			paddedMap.GetLength(0), paddedMap.GetLength(1),
-			0, 0, '.', '+');
-		Console.WriteLine("Map after flood fill:");
-		PrintMap(paddedMap);
-	}
-	
-	void MarkEdges(char[,] tileMap, char borderChar)
-	{
-		bool isSectionOfPipe = false;
-		
-		for (int lineNo = 0; lineNo < tileMap.GetLength(1); lineNo++)
+		_emptyBlockSeq = _emptyBlock.Cast<char>();
+		int emptyInteriorBlocks = 0;
+		char[,] paddedBlock = new char[3, 3];
+		for (int lineNo = 0; lineNo < _originalMapHeight*3; lineNo += 3)
 		{
-			for (int charNo = 0; charNo < tileMap.GetLength(0) - 1; charNo++)
+			for (int charNo = 0; charNo < _originalMapWidth*3; charNo += 3)
 			{
-				char currentChar = tileMap[charNo, lineNo];
-				char nextChar = tileMap[charNo + 1, lineNo];
-				
-				if (isSectionOfPipe)
+				for (int blockLineNo = 0; blockLineNo < 3; blockLineNo++)
 				{
-					if (nextChar == emptyChar)
+					for (int blockCharNo = 0; blockCharNo < 3; blockCharNo++)
 					{
-						tileMap[charNo, lineNo] = borderChar;
-						isSectionOfPipe = false;
-					} else if (charNo == tileMap.GetLength(0) -2)
-					{
-						//Console.Write("last char? charNo is "+charNo+" and next character is "+nextChar);
-						if (nextChar != emptyChar)
-						{
-							tileMap[charNo + 1, lineNo] = borderChar;
-						}
+						char testChar = _paddedMap[charNo + blockCharNo, lineNo + blockLineNo];
+						paddedBlock[blockCharNo, blockLineNo] = testChar;
 					}
 				}
-				else
-				{
-					if (charNo == 0 && currentChar != emptyChar)
-					{
-						tileMap[charNo, lineNo] = borderChar;
-						isSectionOfPipe = true;
-					}
-					if ((currentChar == emptyChar && nextChar != emptyChar))
-					{
-						tileMap[charNo+1, lineNo] = borderChar;
-						isSectionOfPipe = true;
-					}
-					//Console.Write("line "+lineNo+", char "+charNo);
-					
-				}
 
-				Console.Write(tileMap[charNo,lineNo]);
-				if (charNo + 1 == tileMap.GetLength(0) - 1)
+				if (IsInteriorEmptyBlock(paddedBlock))
 				{
-					Console.Write(tileMap[charNo+1,lineNo]);
+					emptyInteriorBlocks++;
 				}
 			}
-
-			isSectionOfPipe = false;
-			Console.WriteLine();
 		}
+		Console.WriteLine("total empty blocks: "+emptyInteriorBlocks);
+	}
+
+	bool IsInteriorEmptyBlock(char[,] paddedBlock)
+	{
+		return (paddedBlock.Cast<char>().SequenceEqual(_emptyBlockSeq));
+	}
+
+
+	void FloodFillExterior()
+	{
+		GFGFloodFill.FloodFill(_paddedMap,
+			_originalMapWidth*3, _originalMapHeight*3,
+			0, 0, EmptyChar, EmptyOutsideChar);
 	}
 	
-	//FIXME: this works for the first test input, but fails on the second
-	void AttemptLassoAlgo()
-	{
-		char emptyChar = '.';
-		char borderChar = 'x';
-		char outsideMarkerChar = 'O';
-		char insideMarkerChar = 'I';
-
-		Console.WriteLine("Marking edges");
-		MarkEdges(paddedMap, borderChar);
-		Console.WriteLine();
-
-		//looping over the array for the billionth time
-		Console.WriteLine("Marking inside tiles");
-		for (int lineNo = 0; lineNo < paddedMap.GetLength(1); lineNo++)
-		{
-			Regex interiorTilePattern = new Regex(@"(.+)(?:\s)(\d+)",
-				RegexOptions.Compiled | RegexOptions.IgnoreCase);
-			Console.WriteLine();
-		}
-
-
-	}
-
 	void MarkNonPathTiles()
 	{
-		Console.WriteLine("processing non-path tiles. Updated map:");
-		for (int lineNo = 0; lineNo < tileMap.GetLength(1); lineNo++)
+		for (int lineNo = 0; lineNo < _originalMapHeight; lineNo++)
 		{
-			for (int charNo = 0; charNo < tileMap.GetLength(0); charNo++)
+			for (int charNo = 0; charNo < _originalMapWidth; charNo++)
 			{
 				Day10Main.Coords tile = new Day10Main.Coords(charNo, lineNo);
-				if (!tilesInPath.Contains(tile))
+				if (!_tilesInPath.Contains(tile))
 				{
-					tileMap[charNo, lineNo] = '.';
+					_tileMap[charNo, lineNo] = '.';
 				}
-				Console.Write(tileMap[charNo,lineNo]);
 			}
-			Console.WriteLine();
 		}
-		Console.WriteLine();
-		
 	}
 
 	
@@ -213,27 +148,23 @@ public class Day10Problem2
 		bool cycleFound = false;
 		bool endFound = false;
 
-		Day10Main.Coords currentPosition = startPosition;
-		SetStartDirectionAndTile(tileMap.GetLength(1), tileMap.GetLength(0),
+		Day10Main.Coords currentPosition = _startPosition;
+		SetStartDirectionAndTile(_originalMapWidth, _originalMapHeight,
 			ref startDirection, ref currentPosition);
 		Direction currentDirection = startDirection;
-		
-		tilesInPath = new List<Day10Main.Coords>();
-		
+
 		while (!cycleFound)
 		{
-			currentChar = tileMap[currentPosition.X, currentPosition.Y];
-			tilesInPath.Add(currentPosition);
+			currentChar = _tileMap[currentPosition.X, currentPosition.Y];
+			Tuple<Direction, char> mapCursor = new Tuple<Direction, char>(currentDirection, currentChar);
+			_tilesInPath.Add(currentPosition);
 			if (currentChar == 'S')
 			{
 				Console.WriteLine("back to the beginning!");
-				Console.WriteLine();
-				Console.WriteLine();
 				cycleFound = true;
 				break;
 			} else if (currentChar == '.')
 			{
-				Console.WriteLine("pipe end found");
 				endFound = true;
 			}
 			else
@@ -243,16 +174,13 @@ public class Day10Problem2
 					switch (currentChar)
 					{
 						case '|': //move up
-							currentPosition.Y -= 1;
-							currentDirection = Direction.Up;
+							MoveUp();
 							break;
 						case 'F': //move right
-							currentPosition.X += 1;
-							currentDirection = Direction.Right;
+							MoveRight();
 							break;
 						case '7': //move left
-							currentPosition.X -= 1;
-							currentDirection = Direction.Left;
+							MoveLeft();
 							break;
 						default:
 							Console.WriteLine("pipe end found");
@@ -265,16 +193,13 @@ public class Day10Problem2
 					switch (currentChar)
 					{
 						case '-': //move right
-							currentPosition.X += 1;
-							currentDirection = Direction.Right;
+							MoveRight();
 							break;
 						case '7': //move down
-							currentPosition.Y += 1;
-							currentDirection = Direction.Down;
+							MoveDown();
 							break;
 						case 'J': //move up
-							currentPosition.Y -= 1;
-							currentDirection = Direction.Up;
+							MoveUp();
 							break;
 						default:
 							Console.WriteLine("pipe end found");
@@ -287,16 +212,13 @@ public class Day10Problem2
 					switch (currentChar)
 					{
 						case '|': //move down
-							currentPosition.Y += 1;
-							currentDirection = Direction.Down;
+							MoveDown();
 							break;
 						case 'L': //move right
-							currentPosition.X += 1;
-							currentDirection = Direction.Right;
+							MoveRight();
 							break;
 						case 'J': //move left
-							currentPosition.X -= 1;
-							currentDirection = Direction.Left;
+							MoveLeft();
 							break;
 						default:
 							Console.WriteLine("pipe end found");
@@ -309,16 +231,13 @@ public class Day10Problem2
 					switch (currentChar)
 					{
 						case '-': //move left
-							currentPosition.X -= 1;
-							currentDirection = Direction.Left;
+							MoveLeft();
 							break;
 						case 'F': //move down
-							currentPosition.Y += 1;
-							currentDirection = Direction.Down;
+							MoveDown();
 							break;
 						case 'L': //move up
-							currentPosition.Y -= 1;
-							currentDirection = Direction.Up;
+							MoveUp();
 							break;
 						default:
 							Console.WriteLine("pipe end found");
@@ -330,33 +249,54 @@ public class Day10Problem2
 
 			if (endFound)
 			{
-				currentPosition = startPosition;
-				tilesInPath = new List<Day10Main.Coords>();
+				currentPosition = _startPosition;
+				_tilesInPath = new List<Day10Main.Coords>();
 				switch (currentDirection)
 				{
 					case Direction.Up:
-						startDirection = currentDirection = Direction.Right;
-						currentPosition.X++;
+						MoveRight();
 						break;
 					case Direction.Right:
-						startDirection = currentDirection = Direction.Down;
-						currentPosition.Y++;
+						MoveDown();
 						break;
 					case Direction.Down:
-						startDirection = currentDirection = Direction.Left;
-						currentPosition.X--;
+						MoveLeft();
 						break;
 					case Direction.Left:
 						Console.WriteLine("error, have already checked all directions");
 						break;
 				}
+				startDirection = currentDirection;
 				endFound = false;
 			}
 		}
 
 		char startTileChar = ToMapChar(new Tuple<Direction,Direction>(startDirection, currentDirection));
-		tileMap[startPosition.X, startPosition.Y] = startTileChar;
+		_tileMap[_startPosition.X, _startPosition.Y] = startTileChar;
 
+		void MoveLeft()
+		{
+			currentPosition.X -= 1;
+			currentDirection = Direction.Left;
+		}
+
+		void MoveUp()
+		{
+			currentPosition.Y -= 1;
+			currentDirection = Direction.Up;
+		}
+
+		void MoveRight()
+		{
+			currentPosition.X += 1;
+			currentDirection = Direction.Right;
+		}
+
+		void MoveDown()
+		{
+			currentPosition.Y += 1;
+			currentDirection = Direction.Down;
+		}
 	}
 	
 	void SetStartDirectionAndTile(int mapWidth, int mapHeight, ref Direction startDirection, ref Day10Main.Coords firstPos)
@@ -381,6 +321,7 @@ public class Day10Problem2
 		}
 	}
 
+	
 	public static char ToMapChar(Tuple<Direction,Direction> startAndEnd) => startAndEnd switch
 	{
 		(Direction.Up, Direction.Up) or (Direction.Down,Direction.Down)       => '|',
@@ -392,38 +333,47 @@ public class Day10Problem2
 		_ => '!'
 	};
 	
-	
-	
 	void LoadData()
 	{
-		var path = Path.Combine(Directory.GetCurrentDirectory(), "input_test.txt");
+		var path = Path.Combine(Directory.GetCurrentDirectory(), "input.txt");
 		
 		if (File.Exists(path))
 		{
-			
 			string[] textAsLines = File.ReadAllLines(path);
 			int lineLength = textAsLines[0].Length;
-			tileMap = new char[lineLength,textAsLines.Length];
+			_tileMap = new char[lineLength,textAsLines.Length];
 			int lineNo = 0;
 			foreach (string inputLine in textAsLines)
 			{
 				int charNo = 0;
 				foreach (char c in inputLine)
 				{
-					Console.Write(c);
-					tileMap[charNo,lineNo] = c;
+					_tileMap[charNo,lineNo] = c;
 					if (c == 'S')
 					{
-						startPosition = new Day10Main.Coords(charNo,lineNo);
+						_startPosition = new Day10Main.Coords(charNo,lineNo);
 					}
 					charNo++;
 				}
 				lineNo++;
-				Console.WriteLine();
 			}
-			Console.WriteLine("start position is "+startPosition.ToString());
+			_originalMapWidth = _tileMap.GetLength(0);
+			_originalMapHeight = _tileMap.GetLength(1);
 		}
+		
 		else { Console.WriteLine($"no file found at {path}"); }
+	}
+	
+	void PrintMap(char[,] theMap)
+	{
+		for (int lineNo = 0; lineNo < theMap.GetLength(1); lineNo++)
+		{
+			for (int charNo = 0; charNo < theMap.GetLength(0) - 1; charNo++)
+			{
+				Console.Write(theMap[charNo,lineNo]);
+			}
+			Console.WriteLine();
+		}
 	}
 	
 }
