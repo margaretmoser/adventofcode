@@ -14,7 +14,8 @@
  * probably intended by the author, is to use Pick's theorem/shoelace formula. But I went with a much slower
  * but (for me) more intuitive approach: expand the grid so that it's easy to detect corners, then flood-fill
  * from the outside, then traverse the expanded grid looking for empty cells. It is very far from efficient
- * or elegant, but it does work and I learned a lot of useful C# things doing it that way.
+ * or elegant but it does work.
+ * 
  * 
  * 
  * Learned about:
