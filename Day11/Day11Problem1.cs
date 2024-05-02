@@ -10,13 +10,14 @@ public class Day11Problem1
 	private List<int> _columnsToDuplicate = new List<int>();
 	private char[,]? _expandedMap;
 	private readonly List<Day11Main.Coords> _originalGalaxyPositions = new List<Day11Main.Coords>();
-	private List<Day11Main.Coords> _expandedGalaxyPositions = new List<Day11Main.Coords>();
+	private Queue<Day11Main.Coords> _expandedGalaxyPositions = new Queue<Day11Main.Coords>();
 	
 	
 	public void Run()
 	{
 		LoadData();
 		CreateExpandedMap();
+		SumPathLengths();
 	}
 
 	private void CreateExpandedMap()
@@ -42,46 +43,34 @@ public class Day11Problem1
 			{
 				Day11Main.Coords newCoords = GetAdjustedGalaxyPosition(galaxyPosition);
 				_expandedMap[newCoords.X, newCoords.Y] = GalaxyChar;
-				_expandedGalaxyPositions.Add(newCoords);
+				_expandedGalaxyPositions.Enqueue(newCoords);
 			}
 			Console.WriteLine("Expanded map:");
 			PrintMap(_expandedMap);
 		}
 	}
 
-	List<int> FindColsWithGalaxies(int originalColumnCount, int originalRowCount)
+	void SumPathLengths()
 	{
-		List<int> colsToDuplicate = new List<int>();
-		if (_rawMap != null)
+		int totalOfAllPathLengths = 0;
+		while (_expandedGalaxyPositions.Count > 0)
 		{
-			for (int originalCharNo = 0; originalCharNo < originalColumnCount; originalCharNo++)
+			Day11Main.Coords galaxyPosition = _expandedGalaxyPositions.Dequeue();
+			foreach (Day11Main.Coords otherGalaxyPosition in _expandedGalaxyPositions)
 			{
-				var columnHasGalaxy = false;
-				for (int originalLineNo = 0; originalLineNo < originalRowCount; originalLineNo++)
-				{
-					columnHasGalaxy = columnHasGalaxy || _rawMap[originalCharNo, originalLineNo] == GalaxyChar;
-				}
-
-				if (!columnHasGalaxy) colsToDuplicate.Add(originalCharNo);
+				int shortestPathToThisGalaxy = Math.Abs(galaxyPosition.X - otherGalaxyPosition.X) + 
+				                       Math.Abs(galaxyPosition.Y - otherGalaxyPosition.Y);
+				Console.WriteLine("Galaxy at "+galaxyPosition+" to galaxy at "+otherGalaxyPosition+": "+shortestPathToThisGalaxy);
+				totalOfAllPathLengths += shortestPathToThisGalaxy;
 			}
 		}
-		return colsToDuplicate;
+		Console.WriteLine("total of all paths is "+totalOfAllPathLengths);
+		
 	}
-
-	Day11Main.Coords GetAdjustedGalaxyPosition(Day11Main.Coords originalPos)
-	{
-		Day11Main.Coords newCoords = new Day11Main.Coords();
-		int newColPosition = _columnsToDuplicate.TakeWhile(dupeCol => dupeCol < originalPos.X).Count();
-		newCoords.X = originalPos.X + newColPosition;
-		int newRowPosition = _rowsToDuplicate.TakeWhile(dupeRow => dupeRow < originalPos.Y).Count();
-		newCoords.Y = originalPos.Y + newRowPosition;
-		return newCoords;
-	}
-
 
 	void LoadData()
 	{
-		var path = Path.Combine(Directory.GetCurrentDirectory(), "input_test.txt");
+		var path = Path.Combine(Directory.GetCurrentDirectory(), "input.txt");
 		if (File.Exists(path))
 		{
 			string[] textAsLines = File.ReadAllLines(path);
@@ -110,6 +99,40 @@ public class Day11Problem1
 		else { Console.WriteLine($"no file found at {path}"); }
 	}
 
+	
+	/*
+	 * helper methods
+	 */
+	
+	List<int> FindColsWithGalaxies(int originalColumnCount, int originalRowCount)
+	{
+		List<int> colsToDuplicate = new List<int>();
+		if (_rawMap != null)
+		{
+			for (int originalCharNo = 0; originalCharNo < originalColumnCount; originalCharNo++)
+			{
+				var columnHasGalaxy = false;
+				for (int originalLineNo = 0; originalLineNo < originalRowCount; originalLineNo++)
+				{
+					columnHasGalaxy = columnHasGalaxy || _rawMap[originalCharNo, originalLineNo] == GalaxyChar;
+				}
+
+				if (!columnHasGalaxy) colsToDuplicate.Add(originalCharNo);
+			}
+		}
+		return colsToDuplicate;
+	}
+
+	Day11Main.Coords GetAdjustedGalaxyPosition(Day11Main.Coords originalPos)
+	{
+		Day11Main.Coords newCoords = new Day11Main.Coords();
+		int newColPosition = _columnsToDuplicate.TakeWhile(dupeCol => dupeCol < originalPos.X).Count();
+		newCoords.X = originalPos.X + newColPosition;
+		int newRowPosition = _rowsToDuplicate.TakeWhile(dupeRow => dupeRow < originalPos.Y).Count();
+		newCoords.Y = originalPos.Y + newRowPosition;
+		return newCoords;
+	}
+	
 	void PrintMap(char[,] theMap)
 	{
 		for (int lineNo = 0; lineNo < theMap.GetLength(1); lineNo++)
