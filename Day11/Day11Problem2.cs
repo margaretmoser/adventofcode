@@ -1,14 +1,14 @@
 namespace Day11;
 
-public class Day11Problem1
+public class Day11Problem2
 {
+	private const int ExpansionFactor = 1000000;
 	private const char GalaxyChar = '#';
 	private char[,]? _rawMap;
 	private readonly List<int> _rowsToDuplicate = new List<int>();
 	private List<int> _columnsToDuplicate = new List<int>();
 	private readonly List<Day11Main.Coords> _originalGalaxyPositions = new List<Day11Main.Coords>();
 	private readonly Queue<Day11Main.Coords> _expandedGalaxyPositions = new Queue<Day11Main.Coords>();
-	
 	
 	public void Run()
 	{
@@ -28,27 +28,25 @@ public class Day11Problem1
 			{
 				Day11Main.Coords newCoords = GetAdjustedGalaxyPosition(galaxyPosition);
 				_expandedGalaxyPositions.Enqueue(newCoords);
+				Console.WriteLine("galaxy "+galaxyPosition+" => "+newCoords);
 			}
 		}
 	}
 
 	void SumPathLengths()
 	{
-		int totalOfAllPathLengths = 0;
+		long totalOfAllPathLengths = 0;
 		while (_expandedGalaxyPositions.Count > 0)
 		{
 			Day11Main.Coords galaxyPosition = _expandedGalaxyPositions.Dequeue();
 			foreach (Day11Main.Coords otherGalaxyPosition in _expandedGalaxyPositions)
 			{
-				int shortestPathToThisGalaxy = Math.Abs(galaxyPosition.X - otherGalaxyPosition.X) + 
+				long shortestPathToThisGalaxy = Math.Abs(galaxyPosition.X - otherGalaxyPosition.X) + 
 				                       Math.Abs(galaxyPosition.Y - otherGalaxyPosition.Y);
-				Console.WriteLine("Galaxy at "+galaxyPosition+" to galaxy at "+otherGalaxyPosition+": "+shortestPathToThisGalaxy);
 				totalOfAllPathLengths += shortestPathToThisGalaxy;
 			}
 		}
 		Console.WriteLine("total of all paths is "+totalOfAllPathLengths);
-		
-		//9536038 is original answer
 		
 	}
 
@@ -111,9 +109,9 @@ public class Day11Problem1
 	{
 		Day11Main.Coords newCoords = new Day11Main.Coords();
 		int newColPosition = _columnsToDuplicate.TakeWhile(dupeCol => dupeCol < originalPos.X).Count();
-		newCoords.X = originalPos.X + newColPosition;
+		newCoords.X = originalPos.X + newColPosition*(ExpansionFactor-1);
 		int newRowPosition = _rowsToDuplicate.TakeWhile(dupeRow => dupeRow < originalPos.Y).Count();
-		newCoords.Y = originalPos.Y + newRowPosition;
+		newCoords.Y = originalPos.Y + newRowPosition*(ExpansionFactor-1);
 		return newCoords;
 	}
 	
