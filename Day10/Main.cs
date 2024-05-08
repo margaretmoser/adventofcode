@@ -54,6 +54,9 @@
  *			DotNetFiddle exists
  *			https://dotnetfiddle.net/OnYtq7
  *
+ *			Confirmation of my theory that I needed to expand the grid before flood-fill
+ *			https://www.reddit.com/r/adventofcode/comments/18ey1s7/2023_day_10_part_2_stumped_on_how_to_approach_this/
+ *
  *			Some other home-rolled approaches which are pretty neat
  *			https://www.reddit.com/r/adventofcode/comments/18fuqdd/2023_day_10_part_2_hint/
  *
