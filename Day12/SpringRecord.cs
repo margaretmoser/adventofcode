@@ -4,6 +4,7 @@ using System.Text.RegularExpressions;
 public class SpringRecord
 {
 	private readonly string _springCharacters;
+	private readonly string _blockCountStringForDebugging;
 	private int[] blockCountArray;
 	//List of characters to substitute in place of '?'
 	private readonly List<char> _validChars = new List<char>() { Day12Main.WorkingSpringChar, Day12Main.DamagedSpringChar };
@@ -13,8 +14,8 @@ public class SpringRecord
 	public SpringRecord(string springs, string blocks)
 	{
 		_springCharacters = springs;
+		_blockCountStringForDebugging = blocks;
 		blockCountArray = Array.ConvertAll(blocks.Split(','), int.Parse);
-		SolveRecord();
 	}
 
 	public int SolveRecord()
@@ -23,23 +24,28 @@ public class SpringRecord
 		string blocksPatternString = "^\\.*";
 		for (int i = 0; i < blockCountArray.Length; i++)
 		{
-			//	[\#]{1}\.+[\#]{1}\.+[\#]{3} [\.\s]
+			//ex:	^\.*[\#]{3}[\.\s]+[\#]{2}[\.\s]+[\#]{1}[\.]*$
 			blocksPatternString += "[\\#]{" + blockCountArray[i].ToString() + "}[\\.]";
 			blocksPatternString += (i < blockCountArray.Length - 1) ? "+" : "*$";
 		}
-		Console.WriteLine("block pattern is "+blocksPatternString);
+		//Console.WriteLine("block pattern is "+blocksPatternString);
 		Regex blocksPattern = new Regex(blocksPatternString,
 			RegexOptions.Compiled | RegexOptions.IgnoreCase);
 		
 		GenerateCombos(_springCharacters, String.Empty);
-		Console.WriteLine("for spring pattern "+_springCharacters+", valid combos are: ");
+		Console.WriteLine("valid combos for springs "+_springCharacters+
+		                  " and block pattern "+_blockCountStringForDebugging+":");
+
 		foreach (string permutation in _permutations)
 		{
 			if (Regex.IsMatch(permutation, blocksPatternString))
 			{
-				Console.WriteLine(permutation);
+				if (Day12Problem1.UseTestInput || Day12Problem1.UseMaxLines) Console.WriteLine(permutation);
+				validPermutations++;
 			}
 		}
+		Console.WriteLine("Total: "+validPermutations.ToString());
+		Console.WriteLine();
 
 
 		return validPermutations;

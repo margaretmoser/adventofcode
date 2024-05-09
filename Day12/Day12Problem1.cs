@@ -3,19 +3,33 @@ namespace Day12;
 
 public class Day12Problem1
 {
-	private const bool UseTestInput = true;
+	public const bool UseTestInput = false;
+	public const bool UseMaxLines = true;
+	private const int maxLines = 100;
 	private List<SpringRecord> _records = new List<SpringRecord>();
 	private int _maxBlockSize = 0;
 	private readonly Dictionary<int, string[]> _potentialPatterns = new Dictionary<int, string[]>();
-	//List of characters to permute to find valid combinations
+	//List of characters to combine to find valid combinations
 	private readonly List<char> _validChars = new List<char>() { Day12Main.UnknownSpringChar, Day12Main.DamagedSpringChar };
 	//List of combinations generated
-	private List<string> _permutations = new List<string>();
+	private List<string> _combinations = new List<string>();
 
 	public void Run()
 	{
 		LoadData();
-		//GeneratePatterns();
+		CountValidCombinations();
+	}
+
+	void CountValidCombinations()
+	{
+		int totalCombinations = 0;
+		foreach (SpringRecord record in _records)
+		{
+			totalCombinations += record.SolveRecord();
+			Console.WriteLine("running total: "+totalCombinations);
+		}
+		Console.WriteLine("Total valid combinations for all records: "+totalCombinations.ToString());
+		//7273 is too high
 	}
 
 	void GeneratePatterns()
@@ -23,7 +37,7 @@ public class Day12Problem1
 		for (int i = 0; i < 15; i++)
 		{
 			string[] thePatterns = new string[i];
-			_permutations = new List<string>();
+			_combinations = new List<string>();
 			string starterString = "".PadLeft(i+1, Day12Main.UnknownSpringChar);
 			// 1 = #,?
 			// 2 = ##, #?, ?#, ??
@@ -40,20 +54,15 @@ public class Day12Problem1
 		
 		if (File.Exists(path))
 		{
+			int linesRead = 0;
 			using StreamReader file = new StreamReader(path);
-			while (file.ReadLine() is { } ln)
+			while (file.ReadLine() is { } ln && (!UseMaxLines || linesRead < maxLines))
 			{
 				GroupCollection gc = springsPattern.Match(ln).Groups;
-
 				string springs = gc[1].Value;
-				Console.Write("springs: "+springs+", ");
-				
 				string blockPattern = gc[2].Value;
-				Console.WriteLine("block pattern: "+blockPattern);
-
 				_records.Add(new SpringRecord(springs, blockPattern));
-				
-				Console.WriteLine();
+				linesRead++;
 			}
 			file.Close();
 		}
