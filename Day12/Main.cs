@@ -17,7 +17,10 @@
  *
  * This kind of problem (finding different subsets k of a set n) is called k-combinations
  * https://www.baeldung.com/cs/generate-k-combinations
- * 
+ *
+ * It's important to test your input regex for things like "two-digit number at the end of the line"
+ * h/t
+ * https://www.reddit.com/r/adventofcode/comments/18gg5u3/2023_day_12_part_1_sigh/
  */
 
 namespace Day12;

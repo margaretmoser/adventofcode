@@ -4,7 +4,10 @@ namespace Day12;
 public class Day12Problem1
 {
 	public const bool UseTestInput = false;
-	public const bool UseMaxLines = true;
+	public const bool printPatterns = false;
+	
+	private const bool UseLineRange = false;
+	private const int startingLine = 900;
 	private const int maxLines = 100;
 	private List<SpringRecord> _records = new List<SpringRecord>();
 	private int _maxBlockSize = 0;
@@ -49,47 +52,30 @@ public class Day12Problem1
 	void LoadData()
 	{
 		var path = Path.Combine(Directory.GetCurrentDirectory(), UseTestInput? "input_test.txt":"input.txt");
-		Regex springsPattern = new Regex(@"([\.\?\#]+)\W((?:\d+\,)*\d)",
+		Regex springsPattern = new Regex(@"([\.\?\#]+)\W((?:\d+\,)*\d+)",
 			RegexOptions.Compiled | RegexOptions.IgnoreCase);
 		
 		if (File.Exists(path))
 		{
 			int linesRead = 0;
 			using StreamReader file = new StreamReader(path);
-			while (file.ReadLine() is { } ln && (!UseMaxLines || linesRead < maxLines))
+			while (file.ReadLine() is { } ln && (!UseLineRange || linesRead < maxLines))
 			{
-				GroupCollection gc = springsPattern.Match(ln).Groups;
-				string springs = gc[1].Value;
-				string blockPattern = gc[2].Value;
-				_records.Add(new SpringRecord(springs, blockPattern));
+				if (!UseLineRange || linesRead >= startingLine)
+				{
+					GroupCollection gc = springsPattern.Match(ln).Groups;
+					string springs = gc[1].Value;
+					string blockPattern = gc[2].Value;
+					Console.WriteLine("sending block pattern to SpringRecord: "+blockPattern);
+					_records.Add(new SpringRecord(springs, blockPattern));
+				}
+
 				linesRead++;
 			}
 			file.Close();
 		}
 		else { Console.WriteLine($"no file found at {path}"); }
 	}
-
-
-
-	
-	//from https://stackoverflow.com/a/8844897
-/*
-	List<string> GenerateCombos(string mask, string combination)
-	{
-		
-		if (mask.Length <= 0)
-		{
-			//No more chars left in the mask, add this combination to the solution list.
-			_permutations.Add(combination);
-			return _permutations;
-		}
-		
-		_validChars.ForEach(c => GenerateCombos(mask.Substring(1), combination + c));
-		
-
-
-	}
-	*/
 
 	
 }

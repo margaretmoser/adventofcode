@@ -5,7 +5,7 @@ public class SpringRecord
 {
 	private readonly string _springCharacters;
 	private readonly string _blockCountStringForDebugging;
-	private int[] blockCountArray;
+	private int[] _blockCountArray;
 	//List of characters to substitute in place of '?'
 	private readonly List<char> _validChars = new List<char>() { Day12Main.WorkingSpringChar, Day12Main.DamagedSpringChar };
 	//List of combinations generated
@@ -15,20 +15,20 @@ public class SpringRecord
 	{
 		_springCharacters = springs;
 		_blockCountStringForDebugging = blocks;
-		blockCountArray = Array.ConvertAll(blocks.Split(','), int.Parse);
+		_blockCountArray = Array.ConvertAll(blocks.Split(','), int.Parse);
 	}
 
 	public int SolveRecord()
 	{
 		int validPermutations = 0;
 		string blocksPatternString = "^\\.*";
-		for (int i = 0; i < blockCountArray.Length; i++)
+		for (int i = 0; i < _blockCountArray.Length; i++)
 		{
-			//ex:	^\.*[\#]{3}[\.\s]+[\#]{2}[\.\s]+[\#]{1}[\.]*$
-			blocksPatternString += "[\\#]{" + blockCountArray[i].ToString() + "}[\\.]";
-			blocksPatternString += (i < blockCountArray.Length - 1) ? "+" : "*$";
+			//ex:	^\.*[\#]{3}[\.\s]+[\#]{2}[\.\s]+[\#]{1}[\.]*$ matches 3,2,1
+			blocksPatternString += "[\\#]{" + _blockCountArray[i].ToString() + "}[\\.]";
+			blocksPatternString += (i < _blockCountArray.Length - 1) ? "+" : "*$";
 		}
-		//Console.WriteLine("block pattern is "+blocksPatternString);
+		if (Day12Problem1.printPatterns) Console.WriteLine("block pattern is "+blocksPatternString);
 		Regex blocksPattern = new Regex(blocksPatternString,
 			RegexOptions.Compiled | RegexOptions.IgnoreCase);
 		
@@ -40,8 +40,12 @@ public class SpringRecord
 		{
 			if (Regex.IsMatch(permutation, blocksPatternString))
 			{
-				if (Day12Problem1.UseTestInput || Day12Problem1.UseMaxLines) Console.WriteLine(permutation);
+				if (Day12Problem1.printPatterns) Console.WriteLine(permutation);
 				validPermutations++;
+			}
+			else
+			{
+				//Console.WriteLine("non-matching pattern: "+permutation);
 			}
 		}
 		Console.WriteLine("Total: "+validPermutations.ToString());
