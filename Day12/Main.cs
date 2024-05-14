@@ -32,10 +32,10 @@ class Day12Main
 	public const char UnknownSpringChar = '?';
 	static void Main()
 	{
-		Day12Problem1 problem1 = new Day12Problem1();
-		problem1.Run();
-		// Day12Problem2 problem2 = new Day12Problem2();
-		// problem2.Run();
+		// Day12Problem1 problem1 = new Day12Problem1();
+		// problem1.Run();
+		Day12Problem2 problem2 = new Day12Problem2();
+		problem2.Run();
 	}
 			
 }

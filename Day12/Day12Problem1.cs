@@ -4,7 +4,7 @@ namespace Day12;
 public class Day12Problem1
 {
 	private readonly bool _useTestInput = false;
-	private readonly List<SpringRecord> _records = new List<SpringRecord>();
+	private readonly List<SpringRecordRegex> _records = new List<SpringRecordRegex>();
 
 	public void Run()
 	{
@@ -15,7 +15,7 @@ public class Day12Problem1
 	void CountValidCombinations()
 	{
 		int totalCombinations = 0;
-		foreach (SpringRecord record in _records)
+		foreach (SpringRecordRegex record in _records)
 		{
 			totalCombinations += record.SolveRecord();
 			Console.WriteLine("running total: "+totalCombinations);
@@ -37,7 +37,7 @@ public class Day12Problem1
 				GroupCollection gc = springsPattern.Match(ln).Groups;
 				string springs = gc[1].Value;
 				string blockPattern = gc[2].Value;
-				_records.Add(new SpringRecord(springs, blockPattern));
+				_records.Add(new SpringRecordRegex(springs, blockPattern));
 			}
 			file.Close();
 		}

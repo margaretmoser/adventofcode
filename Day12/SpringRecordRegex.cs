@@ -1,9 +1,10 @@
 namespace Day12;
 using System.Text.RegularExpressions;
 
-public class SpringRecord
+public class SpringRecordRegex
 {
 	private readonly bool _printPatterns = false;
+	private const int UnfoldCopyCount = 5;
 	
 	private readonly string _springCharacters;
 	private readonly string _blockCountStringForDebugging;
@@ -13,11 +14,25 @@ public class SpringRecord
 	//List of combinations generated
 	private readonly List<string> _permutations = new List<string>();
 
-	public SpringRecord(string springs, string blocks)
+	public SpringRecordRegex(string springs, string blocks)
 	{
-		_springCharacters = springs;
+		Console.WriteLine("springs "+springs);
+		Console.WriteLine("unfolded "+UnfoldSpringRecord(springs, Day12Main.UnknownSpringChar));
+		_springCharacters = UnfoldSpringRecord(springs, Day12Main.UnknownSpringChar);
+		Console.WriteLine("blocks "+blocks);
+		Console.WriteLine("unfolded "+UnfoldSpringRecord(blocks, ','));
 		_blockCountStringForDebugging = blocks;
 		_blockCountArray = Array.ConvertAll(blocks.Split(','), int.Parse);
+	}
+	
+	string UnfoldSpringRecord(string originalRecord, char separationChar)
+	{
+		string unfolded = originalRecord;
+		for (int i = 0; i < UnfoldCopyCount - 1; i++)
+		{
+			unfolded += separationChar + originalRecord;
+		}
+		return unfolded;
 	}
 
 	public int SolveRecord()
