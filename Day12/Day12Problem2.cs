@@ -4,7 +4,7 @@ namespace Day12;
 public class Day12Problem2
 {
 	private readonly bool _useTestInput = true;
-	private readonly List<SpringRecordRegex> _records = new List<SpringRecordRegex>();
+	private readonly List<SpringRecord> _records = new List<SpringRecord>();
 
 	public void Run()
 	{
@@ -15,7 +15,7 @@ public class Day12Problem2
 	void CountValidCombinations()
 	{
 		int totalCombinations = 0;
-		foreach (SpringRecordRegex record in _records)
+		foreach (SpringRecord record in _records)
 		{
 			totalCombinations += record.SolveRecord();
 			Console.WriteLine("running total: "+totalCombinations);
@@ -23,8 +23,6 @@ public class Day12Problem2
 		Console.WriteLine("Total valid combinations for all records: "+totalCombinations.ToString());
 	}
 
-
-	
 	void LoadData()
 	{
 		var path = Path.Combine(Directory.GetCurrentDirectory(), _useTestInput? "input_test.txt":"input.txt");
@@ -39,7 +37,7 @@ public class Day12Problem2
 				GroupCollection gc = springsPattern.Match(ln).Groups;
 				string springs = gc[1].Value;
 				string blockPattern = gc[2].Value;
-				_records.Add(new SpringRecordRegex(springs, blockPattern));
+				_records.Add(new SpringRecord(springs, blockPattern));
 			}
 			file.Close();
 		}
