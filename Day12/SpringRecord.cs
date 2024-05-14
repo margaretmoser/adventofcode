@@ -38,27 +38,33 @@ public class SpringRecord
 		{
 			unfolded += separationChar + originalRecord;
 		}
-		return unfolded;
-		//return originalRecord;
+		//return unfolded;
+		return originalRecord;
 	}
 
 	public int SolveRecord()
 	{
-		_blocksPatternString = "^\\.*";
+		_blocksPatternString = ".";
 		for (int i = 0; i < _blockCountArray.Length; i++)
 		{
-			//ex:	^\.*[\#]{3}[\.\s]+[\#]{2}[\.\s]+[\#]{1}[\.]*$ matches 3,2,1
-			_blocksPatternString += "\\#{" + _blockCountArray[i] + "}\\.";
-			_blocksPatternString += (i < _blockCountArray.Length - 1) ? "+" : "*$";
+			//ex:	3,2,1 => "###.##.#"
+			//.??#??.?.??#???
+			for (int j = 0; j < _blockCountArray[i]; j++)
+			{
+				_blocksPatternString += '#';
+			}
+			_blocksPatternString += ".";
 		}
-		Console.WriteLine("generated regex is "+_blocksPatternString);
+		Console.WriteLine("generated block pattern is "+_blocksPatternString);
 		
 		Console.WriteLine("valid combos for springs "+_springCharacters+
 		                  " and block pattern "+_blockCountStringForDebugging+":");
 
-		_blockPattern = new Regex(_blocksPatternString, RegexOptions.Compiled);
+		//_blockPattern = new Regex(_blocksPatternString, RegexOptions.Compiled);
 		
-		TestCombinations(_springCharacters, String.Empty);
+		//TestCombinations(_springCharacters, String.Empty);
+		
+		
 		
 		Console.WriteLine("Total: "+_validCombinations);
 		return _validCombinations;
