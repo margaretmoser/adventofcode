@@ -39,6 +39,7 @@ public class SpringRecord
 			unfolded += separationChar + originalRecord;
 		}
 		return unfolded;
+		//return originalRecord;
 	}
 
 	public int SolveRecord()
@@ -47,7 +48,7 @@ public class SpringRecord
 		for (int i = 0; i < _blockCountArray.Length; i++)
 		{
 			//ex:	^\.*[\#]{3}[\.\s]+[\#]{2}[\.\s]+[\#]{1}[\.]*$ matches 3,2,1
-			_blocksPatternString += "[\\#]{" + _blockCountArray[i] + "}[\\.]";
+			_blocksPatternString += "\\#{" + _blockCountArray[i] + "}\\.";
 			_blocksPatternString += (i < _blockCountArray.Length - 1) ? "+" : "*$";
 		}
 		Console.WriteLine("generated regex is "+_blocksPatternString);
