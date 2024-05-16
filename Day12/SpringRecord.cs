@@ -21,12 +21,12 @@ public class SpringRecord
 
 	public SpringRecord(string springs, string blocks)
 	{
-		springs = Regex.Replace(springs, @"\.{2,}", @".");
-		Console.WriteLine("springs "+springs);
-		Console.WriteLine("unfolded "+UnfoldSpringRecord(springs, Day12Main.UnknownSpringChar));
+		springs = '.' + Regex.Replace(springs, @"\.{2,}", @".") + '.';
+		//Console.WriteLine("springs (padded): "+springs);
+		//Console.WriteLine("unfolded "+UnfoldSpringRecord(springs, Day12Main.UnknownSpringChar));
 		_springCharacters = UnfoldSpringRecord(springs, Day12Main.UnknownSpringChar);
-		Console.WriteLine("blocks "+blocks);
-		Console.WriteLine("unfolded "+UnfoldSpringRecord(blocks, ','));
+		//Console.WriteLine("blocks: "+blocks);
+		//Console.WriteLine("unfolded "+UnfoldSpringRecord(blocks, ','));
 		_blockCountStringForDebugging = UnfoldSpringRecord(blocks, ',');
 		_blockCountArray = Array.ConvertAll(_blockCountStringForDebugging.Split(','), int.Parse);
 	}
@@ -44,6 +44,9 @@ public class SpringRecord
 
 	public int SolveRecord()
 	{
+		Console.WriteLine("springs (padded): "+_springCharacters);
+		Console.WriteLine("blocks: "+_blockCountStringForDebugging);
+
 		_blocksPatternString = ".";
 		for (int i = 0; i < _blockCountArray.Length; i++)
 		{

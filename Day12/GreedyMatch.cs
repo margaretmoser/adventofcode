@@ -15,7 +15,8 @@ namespace Day12;
  *				2^2 * 2^3 * 2^3 * 2^3 * 2^3 = 2^(2+3+3+3+3) = 2^14
  *
  *  But this is a simple example where the 3-block anchors each chunk of the pattern. Other
- *  patterns will add more complexity with the unfolding.
+ *  patterns will add more complexity with the unfolding. Maybe it's possible to just test
+ *  the first pattern, then ? + the first pattern, then the first pattern + ?
  *  
  */
 
